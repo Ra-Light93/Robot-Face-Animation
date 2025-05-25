@@ -300,9 +300,9 @@ def blink_animation():
 def draw_mouth():
     """Switch between original and robotic mouth based on speaking state"""
     if DataVariables.speaking:
-        #draw_hyper_dynamic_mouth1()
+        draw_hyper_dynamic_mouth1()
         #draw_hyper_dynamic_mouth2()
-         draw_hyper_dynamic_mouth3()
+        #draw_hyper_dynamic_mouth3()
     else:
         # Keep the original happy mouth when not speaking
         draw_dynamic_mouth()
