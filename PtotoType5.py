@@ -138,8 +138,15 @@ def check_to_play_sound(input):
         "a11": "Audios/11.mp3",
         "on1": "Audios/On1.mp3",
         "on2": "Audios/On2.mp3",
+        "on3": "Audios/On3.mp3",
+        "on4": "Audios/On4.mp3",
+        "on5": "Audios/On5.mp3",
+        "on6": "Audios/On6.mp3",
+        "on7": "Audios/On7.mp3",
         "aus1": "Audios/Aus1.mp3",
-        "aus2": "Audios/Aus2.mp3"
+        "aus2": "Audios/Aus2.mp3",
+        "aus3": "Audios/Aus3.mp3",
+        "aus4": "Audios/Aus4.mp3",
     }
 
     DataVariables.STOP_SPEAKING_EVENT = pygame.USEREVENT + 1
@@ -300,8 +307,8 @@ def blink_animation():
 def draw_mouth():
     """Switch between original and robotic mouth based on speaking state"""
     if DataVariables.speaking:
-        draw_hyper_dynamic_mouth1()
-        #draw_hyper_dynamic_mouth2()
+        #draw_hyper_dynamic_mouth1()
+        draw_hyper_dynamic_mouth2()
         #draw_hyper_dynamic_mouth3()
     else:
         # Keep the original happy mouth when not speaking
