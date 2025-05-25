@@ -300,8 +300,9 @@ def blink_animation():
 def draw_mouth():
     """Switch between original and robotic mouth based on speaking state"""
     if DataVariables.speaking:
-        #draw_robot_speaking()
-        draw_hyper_dynamic_mouth()
+        #draw_hyper_dynamic_mouth1()
+        #draw_hyper_dynamic_mouth2()
+         draw_hyper_dynamic_mouth3()
     else:
         # Keep the original happy mouth when not speaking
         draw_dynamic_mouth()
@@ -472,7 +473,245 @@ def draw_dynamic_mouth():
                         ])
 
         screen.blit(mouth_surface, (0, 0))
-def draw_hyper_dynamic_mouth():
+
+def draw_hyper_dynamic_mouth1():
+    """Simplified robotic mouth for speaking"""
+    base_width = DataVariables.mouth_width
+    base_height = DataVariables.mouth_height
+    pos_x, pos_y = DataVariables.mouth_pos
+
+    # Determine openness - more binary for robotic effect
+    openness = 0.2
+    if DataVariables.speaking:
+        if DataVariables.mouth_openness > 0.5:
+            openness = 0.7  # Open position
+        else:
+            openness = 0.2  # Closed position
+    else:
+        openness = DataVariables.mouth_openness
+
+    # Simple rectangular mouth with clean lines
+    mouth_rect = pygame.Rect(
+        pos_x - base_width / 2,
+        pos_y - base_height * openness / 2,
+        base_width,
+        base_height * openness
+    )
+
+    # Draw with metallic colors
+    if DataVariables.speaking:
+        # Metallic blue for speaking
+        mouth_color = (80, 180, 255)
+        inner_color = (40, 100, 180)
+    else:
+        # Original happy color
+        mouth_color = (0, 180, 255)
+        inner_color = (0, 120, 200)
+
+    # Main mouth rectangle
+    pygame.draw.rect(screen, mouth_color, mouth_rect, 0, 5)
+
+    # Add some simple robotic details when speaking
+    if DataVariables.speaking:
+        # Horizontal bars to suggest mechanical parts
+        for i in range(1, 4):
+            bar_y = mouth_rect.y + i * (mouth_rect.height // 4)
+            pygame.draw.line(
+                screen,
+                (200, 230, 255),
+                (mouth_rect.x, bar_y),
+                (mouth_rect.x + mouth_rect.width, bar_y),
+                2
+            )
+
+        # Add some "teeth" or separators
+        for i in range(1, 5):
+            tooth_x = mouth_rect.x + i * (mouth_rect.width // 5)
+            pygame.draw.line(
+                screen,
+                (255, 255, 255),
+                (tooth_x, mouth_rect.y),
+                (tooth_x, mouth_rect.y + mouth_rect.height),
+                1
+            )
+    else:
+        # Original happy mouth details
+        pygame.draw.rect(screen, inner_color, mouth_rect, 2, 5)
+        pygame.draw.line(
+            screen,
+            (120, 220, 255),
+            (mouth_rect.x, mouth_rect.y + mouth_rect.height // 2),
+            (mouth_rect.x + mouth_rect.width, mouth_rect.y + mouth_rect.height // 2),
+            3
+        )
+def draw_hyper_dynamic_mouth2():
+    """Ultra-responsive mouth animation with dramatic speed increase during speech"""
+    # Base parameters
+    base_width = DataVariables.mouth_width * 1.2
+    base_height = DataVariables.mouth_height * 1.5
+    pos_x, pos_y = DataVariables.mouth_pos
+    t = pygame.time.get_ticks() * 0.001
+
+    # Speech detection - add slight delay for more natural transitions
+    speaking = DataVariables.speaking
+    SPEECH_SPEED_BOOST = 3.5  # How much faster during speech (was ~1.5 before)
+
+    class MouthPhysics:
+        def __init__(self):
+            self.vertices = []
+            self.springs = []
+            # Base physics values
+            self.base_damping = 0.92
+            self.base_tension = 0.25
+            self.gravity = 0.1
+
+        def add_vertex(self, x, y):
+            self.vertices.append({"x": x, "y": y, "vx": 0, "vy": 0, "ox": x, "oy": y})
+
+        def add_spring(self, a, b, length):
+            self.springs.append({"a": a, "b": b, "length": length})
+
+        def update(self, target_points):
+            # Dramatic physics changes during speech
+            current_damping = self.base_damping * (0.6 if speaking else 1.0)  # More extreme damping reduction
+            current_tension = self.base_tension * (SPEECH_SPEED_BOOST if speaking else 1.0)
+
+            # Apply target positions with velocity boost
+            for i, v in enumerate(self.vertices):
+                dx = target_points[i][0] - v["x"]
+                dy = target_points[i][1] - v["y"]
+                boost = 1.5 if speaking else 1.0  # Additional direct velocity boost
+                v["vx"] += dx * current_tension * boost
+                v["vy"] += dy * current_tension * boost
+
+            # Spring forces - make springs more active during speech
+            for s in self.springs:
+                a = self.vertices[s["a"]]
+                b = self.vertices[s["b"]]
+                dx = b["x"] - a["x"]
+                dy = b["y"] - a["y"]
+                dist = max(1, math.sqrt(dx * dx + dy * dy))
+                force_multiplier = 0.15 if speaking else 0.1  # Stronger spring forces
+                force = (dist - s["length"]) * force_multiplier
+                fx = force * dx / dist
+                fy = force * dy / dist
+
+                a["vx"] += fx
+                a["vy"] += fy
+                b["vx"] -= fx
+                b["vy"] -= fy
+
+            # Update positions - apply speed factors
+            for v in self.vertices:
+                v["vx"] *= current_damping
+                v["vy"] *= current_damping
+                v["vy"] += self.gravity
+                # Direct speed multiplier during speech
+                speed_boost = 1.8 if speaking else 1.0
+                v["x"] += v["vx"] * speed_boost
+                v["y"] += v["vy"] * speed_boost
+
+    # Initialize physics
+    if not hasattr(DataVariables, 'mouth_physics'):
+        DataVariables.mouth_physics = MouthPhysics()
+        segments = 20
+        for i in range(segments + 1):
+            DataVariables.mouth_physics.add_vertex(pos_x, pos_y)
+            if i > 0:
+                DataVariables.mouth_physics.add_spring(i - 1, i, base_width / segments)
+
+    # Emotional parameters with extreme speech dynamics
+    emotion_params = {
+        "happy": {
+            "curve": 0.8,
+            "openness": 0.5 + math.sin(t) * 0.05,
+            "color": (0, 180, 255),
+            "highlight": (120, 220, 255),
+            "shadow": (0, 120, 200)
+        },
+        "speaking_happy": {
+            "curve": 0.6,
+            "openness": DataVariables.mouth_openness * (1.3 + 0.3 * math.sin(t * 15)),  # Much faster oscillation
+            "color": (100, 200, 255),
+            "highlight": (140, 240, 255),
+            "shadow": (60, 160, 220)
+        }
+    }
+
+    current_emotion = "speaking_happy" if speaking else "happy"
+    params = emotion_params[current_emotion]
+
+    # Generate target points with ultra-dynamic speech effects
+    segments = len(DataVariables.mouth_physics.vertices) - 1
+    target_points = []
+    for i in range(segments + 1):
+        x = pos_x - base_width / 2 + (base_width * i / segments)
+        norm_pos = (i / segments - 0.5) * 2
+
+        # Extreme curve changes during speech
+        curve_factor = params["curve"] * (1 - abs(norm_pos) ** 3)
+        freq = 12 if speaking else 3  # Much higher frequency when speaking
+        openness_factor = params["openness"] * (0.8 + 0.2 * math.sin(t * freq + i * 0.5))
+        y_offset = curve_factor * base_height * openness_factor
+
+        # Aggressive tremble effect during speech
+        tremble_freq = 50 if speaking else 20
+        tremble = math.sin(t * tremble_freq + i * 2) * (1.2 if speaking else 0.2)
+
+        y = pos_y + y_offset + tremble
+        target_points.append((x, y))
+
+    # Update physics simulation
+    DataVariables.mouth_physics.update(target_points)
+
+    # Render mouth (same as before but with speedier movements)
+    current_points = [(v["x"], v["y"]) for v in DataVariables.mouth_physics.vertices]
+    if len(current_points) > 1:
+        mouth_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
+
+        # Draw main lips
+        for i in range(len(current_points) - 1):
+            p1 = current_points[i]
+            p2 = current_points[i + 1]
+
+            thickness = int(10 + 6 * (1 - abs(i / segments - 0.5) * 2))
+            color_progress = i / segments
+            base_color = (
+                min(255, max(0, params["color"][0] + int(30 * math.sin(color_progress * math.pi)))),
+                min(255, max(0, params["color"][1] + int(20 * math.sin(color_progress * math.pi)))),
+                min(255, max(0, params["color"][2] + int(10 * math.sin(color_progress * math.pi * 2))))
+            )
+
+            pygame.draw.line(mouth_surface, base_color, p1, p2, thickness)
+
+            # Add highlight
+            highlight_p1 = (p1[0], p1[1] - thickness * 0.2)
+            highlight_p2 = (p2[0], p2[1] - thickness * 0.2)
+            pygame.draw.line(mouth_surface, params["highlight"], highlight_p1, highlight_p2, int(thickness * 0.3))
+
+            # Add shadow
+            shadow_p1 = (p1[0], p1[1] + thickness * 0.3)
+            shadow_p2 = (p2[0], p2[1] + thickness * 0.3)
+            pygame.draw.line(mouth_surface, params["shadow"], shadow_p1, shadow_p2, int(thickness * 0.4))
+
+        # Draw inner mouth when open
+        if params["openness"] > 0.4:
+            inner_points = []
+            inner_segments = max(3, int(segments * 0.7))
+            for j in range(inner_segments + 1):
+                src_i = int(j / inner_segments * segments)
+                p = current_points[src_i]
+                offset = (base_height * 0.2 * params["openness"] *
+                          (1 - abs(j / inner_segments - 0.5) * 2))
+                inner_points.append((p[0], p[1] + offset))
+
+            if len(inner_points) > 1:
+                pygame.draw.lines(mouth_surface, (60, 80, 120, 200), False, inner_points, 6)
+
+
+
+        screen.blit(mouth_surface, (0, 0))
+def draw_hyper_dynamic_mouth3():
     """Ultra-responsive mouth animation with dramatic speed increase during speech"""
     # Base parameters
     base_width = DataVariables.mouth_width * 1.2
@@ -650,76 +889,7 @@ def draw_hyper_dynamic_mouth():
 
         screen.blit(mouth_surface, (0, 0))
 
-def draw_robot_speaking():
-    """Simplified robotic mouth for speaking"""
-    base_width = DataVariables.mouth_width
-    base_height = DataVariables.mouth_height
-    pos_x, pos_y = DataVariables.mouth_pos
 
-    # Determine openness - more binary for robotic effect
-    openness = 0.2
-    if DataVariables.speaking:
-        if DataVariables.mouth_openness > 0.5:
-            openness = 0.7  # Open position
-        else:
-            openness = 0.2  # Closed position
-    else:
-        openness = DataVariables.mouth_openness
-
-    # Simple rectangular mouth with clean lines
-    mouth_rect = pygame.Rect(
-        pos_x - base_width / 2,
-        pos_y - base_height * openness / 2,
-        base_width,
-        base_height * openness
-    )
-
-    # Draw with metallic colors
-    if DataVariables.speaking:
-        # Metallic blue for speaking
-        mouth_color = (80, 180, 255)
-        inner_color = (40, 100, 180)
-    else:
-        # Original happy color
-        mouth_color = (0, 180, 255)
-        inner_color = (0, 120, 200)
-
-    # Main mouth rectangle
-    pygame.draw.rect(screen, mouth_color, mouth_rect, 0, 5)
-
-    # Add some simple robotic details when speaking
-    if DataVariables.speaking:
-        # Horizontal bars to suggest mechanical parts
-        for i in range(1, 4):
-            bar_y = mouth_rect.y + i * (mouth_rect.height // 4)
-            pygame.draw.line(
-                screen,
-                (200, 230, 255),
-                (mouth_rect.x, bar_y),
-                (mouth_rect.x + mouth_rect.width, bar_y),
-                2
-            )
-
-        # Add some "teeth" or separators
-        for i in range(1, 5):
-            tooth_x = mouth_rect.x + i * (mouth_rect.width // 5)
-            pygame.draw.line(
-                screen,
-                (255, 255, 255),
-                (tooth_x, mouth_rect.y),
-                (tooth_x, mouth_rect.y + mouth_rect.height),
-                1
-            )
-    else:
-        # Original happy mouth details
-        pygame.draw.rect(screen, inner_color, mouth_rect, 2, 5)
-        pygame.draw.line(
-            screen,
-            (120, 220, 255),
-            (mouth_rect.x, mouth_rect.y + mouth_rect.height // 2),
-            (mouth_rect.x + mouth_rect.width, mouth_rect.y + mouth_rect.height // 2),
-            3
-        )
 def draw_Sad_mouth():
     """Dynamic sad mouth with subtle animation and detailed rendering"""
     base_width = DataVariables.mouth_width * 1.2
