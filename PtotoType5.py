@@ -1,10 +1,22 @@
 import random
 import time
-
 import pygame
 import math
 import sys
 from types import SimpleNamespace
+import socket
+
+# Setup non-blocking socket server
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket.bind(('0.0.0.0', 6301))
+server_socket.listen(1)
+print("Waiting for connection...")
+
+conn, addr = server_socket.accept()
+print("Connection from:", addr)
+# Set the socket non-blocking
+conn.setblocking(False)
 
 # Initialize pygame
 pygame.init()
@@ -123,30 +135,52 @@ def handle_input_in_arg():
         else :
             check_to_play_sound(user_input)
 
+def handle_input_from_java(user_input):
+    user_input = user_input.strip().lower()  # <-- CLEAN INPUT
+    if user_input == "left":
+        EyesGoLeft()
+    elif user_input == "right":
+        EyeGoRight()
+    elif user_input == "center":
+        EyesFoCenter()
+    elif user_input.isdigit():
+        MovtoValue = int(user_input) - 45
+        if MovtoValue > 45:
+            print("Invalid: Value too high.")
+        elif MovtoValue < -45:
+            print("Invalid: Value too low.")
+        else:
+            EyesGosTo(MovtoValue)
+    elif user_input == "speake":
+        start_speaking_test(duration=60)  # 1 sec = 60 duraction
+    elif user_input == "stop speake":
+        stop_speaking_test()  # 1 sec = 60 duraction
+    else :
+        check_to_play_sound(user_input)
 def check_to_play_sound(input):
     sound_files = {
-        "a1": "Audios/1.mp3",
-        "a2": "Audios/2.mp3",
-        "a3": "Audios/3.mp3",
-        "a4": "Audios/4.mp3",
-        "a5": "Audios/5.mp3",
-        "a6": "Audios/6.mp3",
-        "a7": "Audios/7.mp3",
-        "a8": "Audios/8.mp3",
-        "a9": "Audios/9.mp3",
-        "a10": "Audios/10.mp3",
-        "a11": "Audios/11.mp3",
-        "on1": "Audios/On1.mp3",
-        "on2": "Audios/On2.mp3",
-        "on3": "Audios/On3.mp3",
-        "on4": "Audios/On4.mp3",
-        "on5": "Audios/On5.mp3",
-        "on6": "Audios/On6.mp3",
-        "on7": "Audios/On7.mp3",
-        "aus1": "Audios/Aus1.mp3",
-        "aus2": "Audios/Aus2.mp3",
-        "aus3": "Audios/Aus3.mp3",
-        "aus4": "Audios/Aus4.mp3",
+        "a1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/1.mp3",
+        "a2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/2.mp3",
+        "a3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/3.mp3",
+        "a4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/4.mp3",
+        "a5": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/5.mp3",
+        "a6": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/6.mp3",
+        "a7": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/7.mp3",
+        "a8": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/8.mp3",
+        "a9": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/9.mp3",
+        "a10": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/10.mp3",
+        "a11": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/11.mp3",
+        "on1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On1.mp3",
+        "on2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On2.mp3",
+        "on3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On3.mp3",
+        "on4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On4.mp3",
+        "on5": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On5.mp3",
+        "on6": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On6.mp3",
+        "on7": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On7.mp3",
+        "aus1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus1.mp3",
+        "aus2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus2.mp3",
+        "aus3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus3.mp3",
+        "aus4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus4.mp3",
     }
 
     DataVariables.STOP_SPEAKING_EVENT = pygame.USEREVENT + 1
@@ -166,6 +200,9 @@ def HandleEvents():
     # Handle cancel oder quit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            conn.close()
+            server_socket.close()
+            print("Connection closed")
             DataVariables.running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -1041,9 +1078,22 @@ while DataVariables.running or pygame.mixer.music.get_busy():
     draw_eyes()
     draw_mouth()
 
+    try:
+        data = conn.recv(1024).decode()
+        if data:
+            strData = str(data)
+            handle_input_from_java(strData)
+            print(len(strData))
+    except BlockingIOError:
+        pass  # no data received, continue animation
+
     # Update display
     pygame.display.flip()
     clock.tick(60)
+
+    if len(sys.argv) > 1:
+        print("Übergebene Argumente:", sys.argv[1:])
+
 
 # Clean up
 pygame.quit()
