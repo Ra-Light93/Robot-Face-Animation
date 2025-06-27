@@ -24,6 +24,7 @@ DataVariables = SimpleNamespace()
 
 # Varables for gloable events :
 DataVariables.STOP_SPEAKING_EVENT = None
+DataVariables.SpeakAllowed = True
 
 # Setup display
 screen = pygame.display.set_mode((700, 700))
@@ -140,35 +141,36 @@ def handle_input_in_arg():
 def handle_input_from_java(user_input):
     input = user_input.strip().lower()
 
-    if input == "gs":
-        playsound("gs")
-    elif input == "ks":
-        playsound("ks")
-    elif input == "rs":
-        playsound("rs")
-    elif input == "gb":
-        playsound("gb")
-    elif input == "kb":
-        playsound("kb")
-    elif input == "rb":
-        playsound("rb")
-    elif input == "g":
-        Random_Num = random.randint(1, 2)
-        randomOn = "g" + str(Random_Num)
-        playsound(randomOn)
+    if DataVariables.SpeakAllowed :
+        if input == "gs":
+            playsound("gs")
+        elif input == "ks":
+            playsound("ks")
+        elif input == "rs":
+            playsound("rs")
+        elif input == "gb":
+            playsound("gb")
+        elif input == "kb":
+            playsound("kb")
+        elif input == "rb":
+            playsound("rb")
+        elif input == "g":
+            Random_Num = random.randint(1, 2)
+            randomOn = "g" + str(Random_Num)
+            playsound(randomOn)
 
-    elif input == "on":
-        print("System an")
-        Random_Num = random.randint(1, 7)
-        randomOn = "On" + str(Random_Num)
-        print(randomOn)
-        playsound(randomOn);
+        elif input == "on":
+            print("System an")
+            Random_Num = random.randint(1, 7)
+            randomOn = "On" + str(Random_Num)
+            print(randomOn)
+            playsound(randomOn);
 
-    elif input == "off":
-        print("System aus")
-        Random_Num = random.randint(1, 3)
-        randomOn = "Aus" + str(Random_Num)
-        playsound(randomOn);
+        elif input == "off":
+            print("System aus")
+            Random_Num = random.randint(1, 3)
+            randomOn = "Aus" + str(Random_Num)
+            playsound(randomOn);
 
     elif input.isdigit():
         MovtoValue = int(input) - 45
@@ -181,7 +183,10 @@ def handle_input_from_java(user_input):
 
     else:
         print("Unbekannter Befehl:", input)
-
+    try:
+        conn.sendall(("recived" + "\n").encode())
+    except:
+        print("Antwort konnte nicht gesendet werden.")
 def playsound(input):
     sound_files = {
         "rb": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/rb.mp3",
@@ -1084,16 +1089,172 @@ def stop_speaking_test():
     # Return to slightly open mouth for happy expression
     DataVariables.target_openness = 0.1
 
+##### buttons ####
+def draw_top_left_button():
+    button_rect = pygame.Rect(20, 20, 150, 50)  # Slightly larger size
+
+    # Add hover and click effects
+    mouse_pos = pygame.mouse.get_pos()
+    is_hovered = button_rect.collidepoint(mouse_pos)
+    is_clicked = pygame.mouse.get_pressed()[0] and is_hovered
+
+    # Base colors
+    base_color = (200, 50, 60)  # Red for terminate
+    hover_color = (230, 70, 80)
+    click_color = (170, 30, 40)
+
+    # Determine current color based on state
+    current_color = base_color
+    if is_clicked:
+        current_color = click_color
+    elif is_hovered:
+        current_color = hover_color
+
+    # Draw button with shadow and rounded corners
+    pygame.draw.rect(screen, (30, 30, 30, 150), button_rect.move(3, 3), border_radius=8)  # Shadow
+    pygame.draw.rect(screen, current_color, button_rect, border_radius=8)  # Main button
+
+    # Add border glow effect when hovered
+    border_color = (255, 255, 255, 100 + (100 if is_hovered else 0))
+    pygame.draw.rect(screen, border_color, button_rect, 2, border_radius=8)
+
+    # Draw text with shadow
+    font = pygame.font.SysFont("Arial", 24, bold=True)
+    text = font.render("Terminate", True, (240, 240, 240))
+    text_rect = text.get_rect(center=button_rect.center)
+
+    # Text shadow
+    shadow_text = font.render("Terminate", True, (0, 0, 0, 150))
+    screen.blit(shadow_text, text_rect.move(1, 1))
+    screen.blit(text, text_rect)
+
+    # Handle click with ripple effect
+    if is_clicked and not hasattr(DataVariables, 'button_click_time'):
+        DataVariables.button_click_time = pygame.time.get_ticks()
+        DataVariables.button_click_pos = mouse_pos
+        print("Terminate clicked!")
+        StopRobot()
+
+    # Draw ripple effect if recently clicked
+    if hasattr(DataVariables, 'button_click_time'):
+        elapsed = pygame.time.get_ticks() - DataVariables.button_click_time
+        if elapsed < 500:  # Show ripple for 500ms
+            ripple_radius = elapsed // 5
+            ripple_alpha = max(0, 150 - (elapsed // 3))
+
+            ripple_surf = pygame.Surface((ripple_radius * 2, ripple_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(ripple_surf, (*click_color, ripple_alpha),
+                               (ripple_radius, ripple_radius), ripple_radius)
+            screen.blit(ripple_surf, (DataVariables.button_click_pos[0] - ripple_radius,
+                                      DataVariables.button_click_pos[1] - ripple_radius))
+        else:
+            delattr(DataVariables, 'button_click_time')
+
+
+DataVariables.right_button_name = "Stop Sound"
+def draw_top_right_button():
+    button_rect = pygame.Rect(screen.get_width() - 170, 20, 150, 50)  # Positioned on right
+
+    # Add hover and click effects
+    mouse_pos = pygame.mouse.get_pos()
+    is_hovered = button_rect.collidepoint(mouse_pos)
+    is_clicked = pygame.mouse.get_pressed()[0] and is_hovered
+
+    # Base colors (blue for sound)
+    base_color = (60, 100, 200)
+    hover_color = (90, 130, 230)
+    click_color = (30, 70, 170)
+
+    # Determine current color based on state
+    current_color = base_color
+    if is_clicked:
+        current_color = click_color
+    elif is_hovered:
+        current_color = hover_color
+
+    # Draw button with shadow and rounded corners
+    pygame.draw.rect(screen, (30, 30, 30, 150), button_rect.move(3, 3), border_radius=8)  # Shadow
+    pygame.draw.rect(screen, current_color, button_rect, border_radius=8)  # Main button
+
+    # Add border glow effect when hovered
+    border_color = (255, 255, 255, 100 + (100 if is_hovered else 0))
+    pygame.draw.rect(screen, border_color, button_rect, 2, border_radius=8)
+
+    # Draw text with shadow
+    font = pygame.font.SysFont("Arial", 24, bold=True)
+    text = font.render(DataVariables.right_button_name, True, (240, 240, 240))
+    text_rect = text.get_rect(center=button_rect.center)
+
+    # Text shadow
+    shadow_text = font.render(DataVariables.right_button_name, True, (0, 0, 0, 150))
+    screen.blit(shadow_text, text_rect.move(1, 1))
+    screen.blit(text, text_rect)
+
+    # Handle click with ripple effect
+    if is_clicked and not hasattr(DataVariables, 'sound_button_click_time'):
+        DataVariables.sound_button_click_time = pygame.time.get_ticks()
+        DataVariables.sound_button_click_pos = mouse_pos
+        print("Sound button clicked!")
+        DataVariables.SpeakAllowed = not DataVariables.SpeakAllowed
+        if DataVariables.SpeakAllowed :
+            DataVariables.right_button_name = "Stop Sound"
+            draw_top_right_button()
+        else :
+            DataVariables.right_button_name = "Sound On"
+            draw_top_right_button()
+
+        # Add your sound stop logic here
+
+    # Draw ripple effect if recently clicked
+    if hasattr(DataVariables, 'sound_button_click_time'):
+        elapsed = pygame.time.get_ticks() - DataVariables.sound_button_click_time
+        if elapsed < 500:  # Show ripple for 500ms
+            ripple_radius = elapsed // 5
+            ripple_alpha = max(0, 150 - (elapsed // 3))
+
+            ripple_surf = pygame.Surface((ripple_radius * 2, ripple_radius * 2), pygame.SRCALPHA)
+            pygame.draw.circle(ripple_surf, (*click_color, ripple_alpha),
+                               (ripple_radius, ripple_radius), ripple_radius)
+            screen.blit(ripple_surf, (DataVariables.sound_button_click_pos[0] - ripple_radius,
+                                      DataVariables.sound_button_click_pos[1] - ripple_radius))
+        else:
+            delattr(DataVariables, 'sound_button_click_time')
+
+
 
 
 # Main loop
 print("Controls: Type 'left', 'right', or 'center'. Or enter a number (0-90) for precise position.\nYou can Type \"speake\" and \"stop speake\" to move the Mouth")
 
-# instasce of audio handler
+
+
+def handle_terminal_input_and_talk_to_java():
+    import select
+    import sys
+
+    if select.select([sys.stdin], [], [], 0)[0]:
+        user_input = sys.stdin.readline().strip()
+        if user_input:
+            conn.sendall((user_input + "\n").encode())  # send to Java
+            try:
+                ready, _, _ = select.select([conn], [], [], 0.2)
+                if ready:
+                    response = conn.recv(1024).decode().strip()
+                    if response:
+                        print("Antwort von Java:", response)
+            except:
+                pass
+
+def StopRobot():
+    try:
+        conn.sendall(b"stop\n")
+        print("Stop-Befehl an Java gesendet.")
+    except:
+        print("Fehler beim Senden des Stop-Befehls.")
 
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
-    #handle_input_in_arg()
+    handle_terminal_input_and_talk_to_java()
 
     # Clear screen
     screen.fill(DataVariables.BG)
@@ -1109,6 +1270,9 @@ while DataVariables.running or pygame.mixer.music.get_busy():
     # Draw face components
     draw_eyes()
     draw_mouth()
+    draw_top_left_button()  # Red terminate button
+    draw_top_right_button()  # Blue sound button
+
 
     try:
         ready, _, _ = select.select([conn], [], [], 0)
