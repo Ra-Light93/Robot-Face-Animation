@@ -1,22 +1,20 @@
-import random
-import time
 import pygame
 import math
 import sys
 from types import SimpleNamespace
 import socket
+import random
+import select
 
-# Setup non-blocking socket server
+# Setup blocking socket server (empfohlen)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_socket.bind(('0.0.0.0', 6301))
+server_socket.bind(('0.0.0.0', 30001))
 server_socket.listen(1)
 print("Waiting for connection...")
 
 conn, addr = server_socket.accept()
 print("Connection from:", addr)
-# Set the socket non-blocking
-conn.setblocking(False)
 
 # Initialize pygame
 pygame.init()
@@ -107,6 +105,10 @@ DataVariables.running = True
 
 ############################## Game Functions #############################################
 
+#integer pberprüfer
+def is_integer(value):
+    return value.strip().isdigit()
+
 #Event Handling functions
 def handle_input_in_arg():
     import sys
@@ -133,55 +135,78 @@ def handle_input_in_arg():
         elif user_input == "stop speake":
             stop_speaking_test()  # 1 sec = 60 duraction
         else :
-            check_to_play_sound(user_input)
+            playsound(user_input)
 
 def handle_input_from_java(user_input):
-    user_input = user_input.strip().lower()  # <-- CLEAN INPUT
-    if user_input == "left":
-        EyesGoLeft()
-    elif user_input == "right":
-        EyeGoRight()
-    elif user_input == "center":
-        EyesFoCenter()
-    elif user_input.isdigit():
-        MovtoValue = int(user_input) - 45
+    input = user_input.strip().lower()
+
+    if input == "gs":
+        playsound("gs")
+    elif input == "ks":
+        playsound("ks")
+    elif input == "rs":
+        playsound("rs")
+    elif input == "gb":
+        playsound("gb")
+    elif input == "kb":
+        playsound("kb")
+    elif input == "rb":
+        playsound("rb")
+    elif input == "g":
+        Random_Num = random.randint(1, 2)
+        randomOn = "g" + str(Random_Num)
+        playsound(randomOn)
+
+    elif input == "on":
+        print("System an")
+        Random_Num = random.randint(1, 7)
+        randomOn = "On" + str(Random_Num)
+        print(randomOn)
+        playsound(randomOn);
+
+    elif input == "off":
+        print("System aus")
+        Random_Num = random.randint(1, 3)
+        randomOn = "Aus" + str(Random_Num)
+        playsound(randomOn);
+
+    elif input.isdigit():
+        MovtoValue = int(input) - 45
         if MovtoValue > 45:
             print("Invalid: Value too high.")
         elif MovtoValue < -45:
             print("Invalid: Value too low.")
         else:
             EyesGosTo(MovtoValue)
-    elif user_input == "speake":
-        start_speaking_test(duration=60)  # 1 sec = 60 duraction
-    elif user_input == "stop speake":
-        stop_speaking_test()  # 1 sec = 60 duraction
-    else :
-        check_to_play_sound(user_input)
-def check_to_play_sound(input):
+
+    else:
+        print("Unbekannter Befehl:", input)
+
+def playsound(input):
     sound_files = {
-        "a1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/1.mp3",
-        "a2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/2.mp3",
-        "a3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/3.mp3",
-        "a4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/4.mp3",
-        "a5": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/5.mp3",
-        "a6": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/6.mp3",
-        "a7": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/7.mp3",
-        "a8": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/8.mp3",
-        "a9": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/9.mp3",
-        "a10": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/10.mp3",
-        "a11": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/11.mp3",
-        "on1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On1.mp3",
-        "on2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On2.mp3",
-        "on3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On3.mp3",
-        "on4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On4.mp3",
-        "on5": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On5.mp3",
-        "on6": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On6.mp3",
-        "on7": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On7.mp3",
-        "aus1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus1.mp3",
-        "aus2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus2.mp3",
-        "aus3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus3.mp3",
-        "aus4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus4.mp3",
+        "rb": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/rb.mp3",
+        "kb": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/kb.mp3",
+        "gb": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/gb.mp3",
+        "rs": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/rs.mp3",
+        "gs": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/gs.mp3",
+        "ks": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/ks.mp3",
+        "Aus3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus3.mp3",
+        "On8": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On8.mp3",
+        "Aus2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus2.mp3",
+        "On7": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On7.mp3",
+        "On6": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On6.mp3",
+        "On5": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On5.mp3",
+        "On4": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On4.mp3",
+        "On3": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On3.mp3",
+        "g2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/g2.mp3",
+        "g1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/g1.mp3",
+        "boxfull": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/boxfull.mp3",
+        "leermagazine": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/leermagazine.mp3",
+        "Aus1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus1.mp3",
+        "On1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On1.mp3",
+        "On2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On2.mp3"
     }
+
 
     DataVariables.STOP_SPEAKING_EVENT = pygame.USEREVENT + 1
     if input in sound_files:
@@ -195,6 +220,10 @@ def check_to_play_sound(input):
 
     else:
         print("Input not recognized.")
+
+
+
+
 
 def HandleEvents():
     # Handle cancel oder quit
@@ -1056,12 +1085,15 @@ def stop_speaking_test():
     DataVariables.target_openness = 0.1
 
 
+
 # Main loop
 print("Controls: Type 'left', 'right', or 'center'. Or enter a number (0-90) for precise position.\nYou can Type \"speake\" and \"stop speake\" to move the Mouth")
 
+# instasce of audio handler
+
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
-    handle_input_in_arg()
+    #handle_input_in_arg()
 
     # Clear screen
     screen.fill(DataVariables.BG)
@@ -1079,13 +1111,17 @@ while DataVariables.running or pygame.mixer.music.get_busy():
     draw_mouth()
 
     try:
-        data = conn.recv(1024).decode()
-        if data:
-            strData = str(data)
-            handle_input_from_java(strData)
-            print(len(strData))
-    except BlockingIOError:
-        pass  # no data received, continue animation
+        ready, _, _ = select.select([conn], [], [], 0)
+        if ready:
+            data = conn.recv(1024)
+            if data:
+                strData = data.decode().strip()
+                handle_input_from_java(strData)
+    except (BlockingIOError, ConnectionResetError):
+        pass
+    except KeyboardInterrupt:
+        pygame.quit()
+        sys.exit()
 
     # Update display
     pygame.display.flip()
