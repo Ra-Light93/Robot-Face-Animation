@@ -161,10 +161,7 @@ def handle_input_from_java(user_input):
 
         elif input == "on":
             print("System an")
-            Random_Num = random.randint(1, 7)
-            randomOn = "On" + str(Random_Num)
-            print(randomOn)
-            playsound(randomOn);
+            playsound("On1");
 
         elif input == "off":
             print("System aus")
@@ -1090,6 +1087,7 @@ def stop_speaking_test():
     DataVariables.target_openness = 0.1
 
 ##### buttons ####
+DataVariables.left_button_name = "Start"
 def draw_top_left_button():
     button_rect = pygame.Rect(20, 20, 150, 50)  # Slightly larger size
 
@@ -1120,11 +1118,11 @@ def draw_top_left_button():
 
     # Draw text with shadow
     font = pygame.font.SysFont("Arial", 24, bold=True)
-    text = font.render("Terminate", True, (240, 240, 240))
+    text = font.render(DataVariables.left_button_name, True, (240, 240, 240))
     text_rect = text.get_rect(center=button_rect.center)
 
     # Text shadow
-    shadow_text = font.render("Terminate", True, (0, 0, 0, 150))
+    shadow_text = font.render(DataVariables.left_button_name, True, (0, 0, 0, 150))
     screen.blit(shadow_text, text_rect.move(1, 1))
     screen.blit(text, text_rect)
 
@@ -1133,7 +1131,11 @@ def draw_top_left_button():
         DataVariables.button_click_time = pygame.time.get_ticks()
         DataVariables.button_click_pos = mouse_pos
         print("Terminate clicked!")
-        StopRobot()
+        StopStartRobot()
+        if DataVariables.left_button_name == "Stop" :
+            DataVariables.left_button_name = "Start"
+        else :
+            DataVariables.left_button_name = "Stop"
 
     # Draw ripple effect if recently clicked
     if hasattr(DataVariables, 'button_click_time'):
@@ -1245,12 +1247,13 @@ def handle_terminal_input_and_talk_to_java():
             except:
                 pass
 
-def StopRobot():
+def StopStartRobot():
     try:
-        conn.sendall(b"stop\n")
+        command = DataVariables.left_button_name
+        conn.sendall(f"{command}\n".encode())
         print("Stop-Befehl an Java gesendet.")
-    except:
-        print("Fehler beim Senden des Stop-Befehls.")
+    except Exception as e:
+        print("Fehler beim Senden des Stop-Befehls:", e)
 
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
