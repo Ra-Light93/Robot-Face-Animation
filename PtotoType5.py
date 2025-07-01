@@ -27,12 +27,12 @@ DataVariables.STOP_SPEAKING_EVENT = None
 DataVariables.SpeakAllowed = True
 
 # Setup display
-screen = pygame.display.set_mode((800, 800))
+screen = pygame.display.set_mode((1000, 1000))
 pygame.display.set_caption("Robotic Face")
 clock = pygame.time.Clock()
 
 # Size parameters
-DataVariables.FaceSize = 0.8
+DataVariables.FaceSize = 0.9
 
 # Color palette
 DataVariables.BG = (240, 240, 245)  # Light gray background
@@ -104,6 +104,7 @@ DataVariables.mouth_pos = (screen.get_width() / 2,
 
 DataVariables.running = True
 
+
 ############################## Game Functions #############################################
 
 #integer pberprüfer
@@ -140,7 +141,7 @@ def handle_input_in_arg():
 
 def handle_input_from_java(user_input):
     input = user_input.strip().lower()
-
+    print("recived value :", input)
     if DataVariables.SpeakAllowed :
         if input == "gs":
             playsound("gs")
@@ -154,6 +155,8 @@ def handle_input_from_java(user_input):
             playsound("kb")
         elif input == "rb":
             playsound("rb")
+        elif input == "ns":
+            playsound("ns")
         elif input == "g":
             Random_Num = random.randint(1, 2)
             randomOn = "g" + str(Random_Num)
@@ -169,14 +172,16 @@ def handle_input_from_java(user_input):
             randomOn = "Aus" + str(Random_Num)
             playsound(randomOn);
 
-    elif input.isdigit():
-        MovtoValue = int(input) - 45
-        if MovtoValue > 45:
-            print("Invalid: Value too high.")
-        elif MovtoValue < -45:
-            print("Invalid: Value too low.")
-        else:
-            EyesGosTo(MovtoValue)
+        elif input.isdigit():
+            value = int(input)
+            MovtoValue = int(input) - 45
+            if MovtoValue > 45:
+                print("Invalid: Value too high.")
+            elif MovtoValue < -45:
+                print("Invalid: Value too low.")
+            else:
+                EyesGosTo(MovtoValue)
+
 
     else:
         print("Unbekannter Befehl:", input)
@@ -206,7 +211,8 @@ def playsound(input):
         "leermagazine": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/leermagazine.mp3",
         "Aus1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus1.mp3",
         "On1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On1.mp3",
-        "On2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On2.mp3"
+        "On2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On2.mp3",
+        "ns" : "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/leermagazine.mp3"
     }
 
 
@@ -222,9 +228,6 @@ def playsound(input):
 
     else:
         print("Input not recognized.")
-
-
-
 
 
 def HandleEvents():
@@ -250,8 +253,6 @@ def EyesFoCenter():
     DataVariables.target_offset = 0
 def EyesGosTo(topos):
     DataVariables.target_offset = topos
-
-
 
 # Drew face
 def draw_face_border():
@@ -964,7 +965,6 @@ def draw_hyper_dynamic_mouth3():
 
         screen.blit(mouth_surface, (0, 0))
 
-
 def draw_Sad_mouth():
     """Dynamic sad mouth with subtle animation and detailed rendering"""
     base_width = DataVariables.mouth_width * 1.2
@@ -1039,7 +1039,6 @@ def draw_Sad_mouth():
             pygame.draw.lines(shadow_surface, (0, 0, 0, 30), False, shadow_points, 10)
             screen.blit(shadow_surface, (0, 0))
 
-
 #Animation Updating
 def update_animation():
     # Smooth eye movement
@@ -1086,142 +1085,131 @@ def stop_speaking_test():
     # Return to slightly open mouth for happy expression
     DataVariables.target_openness = 0.1
 
-##### buttons ####
-DataVariables.left_button_name = "Start"
+# function
+DataVariables.left_button_state = "Start"  # "play" oder "pause"
 def draw_top_left_button():
-    button_rect = pygame.Rect(20, 20, 150, 50)  # Slightly larger size
+    button_radius = 25
+    button_center = (50, 45)  # Position links
 
-    # Add hover and click effects
+    # Hover und Click Effekte
     mouse_pos = pygame.mouse.get_pos()
-    is_hovered = button_rect.collidepoint(mouse_pos)
+    distance = math.sqrt((mouse_pos[0] - button_center[0]) ** 2 + (mouse_pos[1] - button_center[1]) ** 2)
+    is_hovered = distance <= button_radius
     is_clicked = pygame.mouse.get_pressed()[0] and is_hovered
 
-    # Base colors
-    base_color = (200, 50, 60)  # Red for terminate
-    hover_color = (230, 70, 80)
-    click_color = (170, 30, 40)
+    # Button Farbe (Grün)
+    base_color = (80, 180, 80)
+    current_color = (60, 160, 60) if is_clicked else (100, 200, 100) if is_hovered else base_color
 
-    # Determine current color based on state
-    current_color = base_color
-    if is_clicked:
-        current_color = click_color
-    elif is_hovered:
-        current_color = hover_color
+    # Button zeichnen
+    pygame.draw.circle(screen, (30, 30, 30, 150), (button_center[0] + 3, button_center[1] + 3), button_radius)
+    pygame.draw.circle(screen, current_color, button_center, button_radius)
 
-    # Draw button with shadow and rounded corners
-    pygame.draw.rect(screen, (30, 30, 30, 150), button_rect.move(3, 3), border_radius=8)  # Shadow
-    pygame.draw.rect(screen, current_color, button_rect, border_radius=8)  # Main button
+    # Play/Pause Symbol
+    symbol_color = (240, 240, 240)
+    if DataVariables.left_button_state == "Start":
+        # Play Symbol (Dreieck)
+        play_points = [
+            (button_center[0] - 8, button_center[1] - 10),
+            (button_center[0] - 8, button_center[1] + 10),
+            (button_center[0] + 12, button_center[1])
+        ]
+        pygame.draw.polygon(screen, symbol_color, play_points)
+    else:
+        # Pause Symbol
+        pygame.draw.rect(screen, symbol_color, (button_center[0] - 12, button_center[1] - 10, 8, 20))
+        pygame.draw.rect(screen, symbol_color, (button_center[0] + 4, button_center[1] - 10, 8, 20))
 
-    # Add border glow effect when hovered
-    border_color = (255, 255, 255, 100 + (100 if is_hovered else 0))
-    pygame.draw.rect(screen, border_color, button_rect, 2, border_radius=8)
+    # Klick-Handler
+    if is_clicked and not hasattr(DataVariables, 'left_button_click_time'):
+        DataVariables.left_button_click_time = pygame.time.get_ticks()
+        StopStartRobot()  # Deine bestehende Funktion
+        DataVariables.left_button_state = "Stop" if DataVariables.left_button_state == "Start" else "Start"
 
-    # Draw text with shadow
-    font = pygame.font.SysFont("Arial", 24, bold=True)
-    text = font.render(DataVariables.left_button_name, True, (240, 240, 240))
-    text_rect = text.get_rect(center=button_rect.center)
 
-    # Text shadow
-    shadow_text = font.render(DataVariables.left_button_name, True, (0, 0, 0, 150))
-    screen.blit(shadow_text, text_rect.move(1, 1))
-    screen.blit(text, text_rect)
-
-    # Handle click with ripple effect
-    if is_clicked and not hasattr(DataVariables, 'button_click_time'):
-        DataVariables.button_click_time = pygame.time.get_ticks()
-        DataVariables.button_click_pos = mouse_pos
-        print("Terminate clicked!")
-        StopStartRobot()
-        if DataVariables.left_button_name == "Stop" :
-            DataVariables.left_button_name = "Start"
-        else :
-            DataVariables.left_button_name = "Stop"
-
-    # Draw ripple effect if recently clicked
-    if hasattr(DataVariables, 'button_click_time'):
-        elapsed = pygame.time.get_ticks() - DataVariables.button_click_time
-        if elapsed < 500:  # Show ripple for 500ms
-            ripple_radius = elapsed // 5
+    # Ripple-Effekt
+    if hasattr(DataVariables, 'left_button_click_time'):
+        elapsed = pygame.time.get_ticks() - DataVariables.left_button_click_time
+        if elapsed < 500:
+            ripple_radius = int(elapsed // 5)
             ripple_alpha = max(0, 150 - (elapsed // 3))
-
             ripple_surf = pygame.Surface((ripple_radius * 2, ripple_radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(ripple_surf, (*click_color, ripple_alpha),
+            pygame.draw.circle(ripple_surf, (*current_color, ripple_alpha),
                                (ripple_radius, ripple_radius), ripple_radius)
-            screen.blit(ripple_surf, (DataVariables.button_click_pos[0] - ripple_radius,
-                                      DataVariables.button_click_pos[1] - ripple_radius))
+            screen.blit(ripple_surf, (button_center[0] - ripple_radius,
+                                      button_center[1] - ripple_radius))
         else:
-            delattr(DataVariables, 'button_click_time')
+            delattr(DataVariables, 'left_button_click_time')
 
 
-DataVariables.right_button_name = "Stop Sound"
+DataVariables.right_button_state = "sound_on"  # "sound_on" oder "sound_off"
 def draw_top_right_button():
-    button_rect = pygame.Rect(screen.get_width() - 170, 20, 150, 50)  # Positioned on right
+    button_radius = 25
+    button_center = (screen.get_width() - 50, 45)  # Position rechts
 
-    # Add hover and click effects
+    # Hover und Click Effekte
     mouse_pos = pygame.mouse.get_pos()
-    is_hovered = button_rect.collidepoint(mouse_pos)
+    distance = math.sqrt((mouse_pos[0] - button_center[0]) ** 2 + (mouse_pos[1] - button_center[1]) ** 2)
+    is_hovered = distance <= button_radius
     is_clicked = pygame.mouse.get_pressed()[0] and is_hovered
 
-    # Base colors (blue for sound)
-    base_color = (60, 100, 200)
-    hover_color = (90, 130, 230)
-    click_color = (30, 70, 170)
+    # Button Farbe (Blau)
+    base_color = (70, 130, 200)
+    current_color = (50, 110, 180) if is_clicked else (90, 150, 220) if is_hovered else base_color
 
-    # Determine current color based on state
-    current_color = base_color
-    if is_clicked:
-        current_color = click_color
-    elif is_hovered:
-        current_color = hover_color
+    # Button zeichnen
+    pygame.draw.circle(screen, (30, 30, 30, 150), (button_center[0] + 3, button_center[1] + 3), button_radius)
+    pygame.draw.circle(screen, current_color, button_center, button_radius)
 
-    # Draw button with shadow and rounded corners
-    pygame.draw.rect(screen, (30, 30, 30, 150), button_rect.move(3, 3), border_radius=8)  # Shadow
-    pygame.draw.rect(screen, current_color, button_rect, border_radius=8)  # Main button
+    # Audio Symbol (Wellenform oder durchgestrichen)
+    symbol_color = (240, 240, 240)
+    if DataVariables.right_button_state == "sound_on":
+        # Wellenform Symbol
+        wave_points = [
+            (button_center[0] - 12, button_center[1] + 5),
+            (button_center[0] - 8, button_center[1] - 8),
+            (button_center[0] - 4, button_center[1] + 2),
+            (button_center[0], button_center[1] - 5),
+            (button_center[0] + 4, button_center[1] + 0),
+            (button_center[0] + 8, button_center[1] - 3),
+            (button_center[0] + 12, button_center[1] + 6)
+        ]
+        pygame.draw.lines(screen, symbol_color, False, wave_points, 2)
+    else:
+        # Durchgestrichenes Symbol
+        wave_points = [
+            (button_center[0] - 12, button_center[1] + 5),
+            (button_center[0] - 8, button_center[1] - 8),
+            (button_center[0] - 4, button_center[1] + 2),
+            (button_center[0], button_center[1] - 5),
+            (button_center[0] + 4, button_center[1] + 0),
+            (button_center[0] + 8, button_center[1] - 3),
+            (button_center[0] + 12, button_center[1] + 6)
+        ]
+        pygame.draw.lines(screen, symbol_color, False, wave_points, 2)
+        pygame.draw.line(screen, (255, 60, 60),
+                         (button_center[0] - 15, button_center[1] - 15),
+                         (button_center[0] + 15, button_center[1] + 15), 3)
 
-    # Add border glow effect when hovered
-    border_color = (255, 255, 255, 100 + (100 if is_hovered else 0))
-    pygame.draw.rect(screen, border_color, button_rect, 2, border_radius=8)
-
-    # Draw text with shadow
-    font = pygame.font.SysFont("Arial", 24, bold=True)
-    text = font.render(DataVariables.right_button_name, True, (240, 240, 240))
-    text_rect = text.get_rect(center=button_rect.center)
-
-    # Text shadow
-    shadow_text = font.render(DataVariables.right_button_name, True, (0, 0, 0, 150))
-    screen.blit(shadow_text, text_rect.move(1, 1))
-    screen.blit(text, text_rect)
-
-    # Handle click with ripple effect
-    if is_clicked and not hasattr(DataVariables, 'sound_button_click_time'):
-        DataVariables.sound_button_click_time = pygame.time.get_ticks()
-        DataVariables.sound_button_click_pos = mouse_pos
-        print("Sound button clicked!")
+    # Klick-Handler
+    if is_clicked and not hasattr(DataVariables, 'right_button_click_time'):
+        DataVariables.right_button_click_time = pygame.time.get_ticks()
+        DataVariables.right_button_state = "sound_off" if DataVariables.right_button_state == "sound_on" else "sound_on"
         DataVariables.SpeakAllowed = not DataVariables.SpeakAllowed
-        if DataVariables.SpeakAllowed :
-            DataVariables.right_button_name = "Stop Sound"
-            draw_top_right_button()
-        else :
-            DataVariables.right_button_name = "Sound On"
-            draw_top_right_button()
 
-        # Add your sound stop logic here
-
-    # Draw ripple effect if recently clicked
-    if hasattr(DataVariables, 'sound_button_click_time'):
-        elapsed = pygame.time.get_ticks() - DataVariables.sound_button_click_time
-        if elapsed < 500:  # Show ripple for 500ms
-            ripple_radius = elapsed // 5
+    # Ripple-Effekt
+    if hasattr(DataVariables, 'right_button_click_time'):
+        elapsed = pygame.time.get_ticks() - DataVariables.right_button_click_time
+        if elapsed < 500:
+            ripple_radius = int(elapsed // 5)
             ripple_alpha = max(0, 150 - (elapsed // 3))
-
             ripple_surf = pygame.Surface((ripple_radius * 2, ripple_radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(ripple_surf, (*click_color, ripple_alpha),
+            pygame.draw.circle(ripple_surf, (*current_color, ripple_alpha),
                                (ripple_radius, ripple_radius), ripple_radius)
-            screen.blit(ripple_surf, (DataVariables.sound_button_click_pos[0] - ripple_radius,
-                                      DataVariables.sound_button_click_pos[1] - ripple_radius))
+            screen.blit(ripple_surf, (button_center[0] - ripple_radius,
+                                      button_center[1] - ripple_radius))
         else:
-            delattr(DataVariables, 'sound_button_click_time')
-
+            delattr(DataVariables, 'right_button_click_time')
 
 # Main loop
 print("Controls: Type 'left', 'right', or 'center'. Or enter a number (0-90) for precise position.\nYou can Type \"speake\" and \"stop speake\" to move the Mouth")
@@ -1247,11 +1235,13 @@ def handle_terminal_input_and_talk_to_java():
 
 def StopStartRobot():
     try:
-        command = DataVariables.left_button_name
+        command = DataVariables.left_button_state
         conn.sendall(f"{command}\n".encode())
-        print("Stop-Befehl an Java gesendet.")
+        print(command,"-Befehl an Java gesendet.")
     except Exception as e:
         print("Fehler beim Senden des Stop-Befehls:", e)
+
+playsound("On1");
 
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
@@ -1272,6 +1262,7 @@ while DataVariables.running or pygame.mixer.music.get_busy():
     draw_eyes()
     draw_mouth()
     draw_top_left_button()  # Red terminate button
+
     draw_top_right_button()  # Blue sound button
 
 
