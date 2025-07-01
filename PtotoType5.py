@@ -141,7 +141,7 @@ def handle_input_in_arg():
 
 def handle_input_from_java(user_input):
     input = user_input.strip().lower()
-    print("recived value :", input)
+    print("recived form Robot :", input)
     if DataVariables.SpeakAllowed :
         if input == "gs":
             playsound("gs")
@@ -161,29 +161,27 @@ def handle_input_from_java(user_input):
             Random_Num = random.randint(1, 2)
             randomOn = "g" + str(Random_Num)
             playsound(randomOn)
-
         elif input == "on":
             print("System an")
             playsound("On1");
-
         elif input == "off":
             print("System aus")
             Random_Num = random.randint(1, 3)
             randomOn = "Aus" + str(Random_Num)
             playsound(randomOn);
 
-        elif input.isdigit():
-            MovtoValue = int(input) - 45
-            if MovtoValue > 45:
-                print("Invalid: Value too high.")
-            elif MovtoValue < -45:
-                print("Invalid: Value too low.")
-            else:
-                EyesGosTo(MovtoValue)
 
-
+    if input.isdigit():
+        MovtoValue = int(input) - 45
+        if MovtoValue > 45:
+            print("Invalid: Value too high.")
+        elif MovtoValue < -45:
+            print("Invalid: Value too low.")
         else:
-            print("Unbekannter Befehl:", input)
+            EyesGosTo(MovtoValue)
+
+    else:
+        print("Unbekannter Befehl:", input)
     try:
         conn.sendall(("ok" + "\n").encode())
     except:
@@ -1236,7 +1234,7 @@ def StopStartRobot():
     try:
         command = DataVariables.left_button_state
         conn.sendall(f"{command}\n".encode())
-        print(command,"-Befehl an Java gesendet.")
+        print(command,"sent to Java.")
     except Exception as e:
         print("Fehler beim Senden des Stop-Befehls:", e)
 
