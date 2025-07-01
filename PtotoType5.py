@@ -173,7 +173,6 @@ def handle_input_from_java(user_input):
             playsound(randomOn);
 
         elif input.isdigit():
-            value = int(input)
             MovtoValue = int(input) - 45
             if MovtoValue > 45:
                 print("Invalid: Value too high.")
@@ -183,10 +182,10 @@ def handle_input_from_java(user_input):
                 EyesGosTo(MovtoValue)
 
 
-    else:
-        print("Unbekannter Befehl:", input)
+        else:
+            print("Unbekannter Befehl:", input)
     try:
-        conn.sendall(("recived" + "\n").encode())
+        conn.sendall(("ok" + "\n").encode())
     except:
         print("Antwort konnte nicht gesendet werden.")
 def playsound(input):
