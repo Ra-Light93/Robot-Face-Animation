@@ -27,12 +27,12 @@ DataVariables.STOP_SPEAKING_EVENT = None
 DataVariables.SpeakAllowed = True
 
 # Setup display
-screen = pygame.display.set_mode((700, 700))
+screen = pygame.display.set_mode((800, 800))
 pygame.display.set_caption("Robotic Face")
 clock = pygame.time.Clock()
 
 # Size parameters
-DataVariables.FaceSize = 0.7
+DataVariables.FaceSize = 0.8
 
 # Color palette
 DataVariables.BG = (240, 240, 245)  # Light gray background
@@ -1221,8 +1221,6 @@ def draw_top_right_button():
                                       DataVariables.sound_button_click_pos[1] - ripple_radius))
         else:
             delattr(DataVariables, 'sound_button_click_time')
-
-
 
 
 # Main loop
