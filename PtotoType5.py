@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import socket
 import random
 import select
+import threading
 
 # Setup blocking socket server (empfohlen)
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,6 +16,18 @@ print("Waiting for connection...")
 
 conn, addr = server_socket.accept()
 print("Connection from:", addr)
+
+def robot_listener_thread():
+    while DataVariables.running:
+        try:
+            ready, _, _ = select.select([conn], [], [], 0.1)
+            if ready:
+                data = conn.recv(1024)
+                if data:
+                    strData = data.decode().strip()
+                    handle_input_from_java(strData)
+        except Exception:
+            continue
 
 # Initialize pygame
 pygame.init()
@@ -1239,6 +1252,7 @@ def StopStartRobot():
         print("Fehler beim Senden des Stop-Befehls:", e)
 
 playsound("On1");
+threading.Thread(target=robot_listener_thread, daemon=True).start()
 
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
@@ -1262,19 +1276,6 @@ while DataVariables.running or pygame.mixer.music.get_busy():
 
     draw_top_right_button()  # Blue sound button
 
-
-    try:
-        ready, _, _ = select.select([conn], [], [], 0)
-        if ready:
-            data = conn.recv(1024)
-            if data:
-                strData = data.decode().strip()
-                handle_input_from_java(strData)
-    except (BlockingIOError, ConnectionResetError):
-        pass
-    except KeyboardInterrupt:
-        pygame.quit()
-        sys.exit()
 
     # Update display
     pygame.display.flip()
