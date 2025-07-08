@@ -182,7 +182,10 @@ def handle_input_from_java(user_input):
             Random_Num = random.randint(1, 3)
             randomOn = "Aus" + str(Random_Num)
             playsound(randomOn);
-
+        elif input == "buttonp":
+            playsound("buttonp")
+        elif input == "buttons":
+            playsound("buttons")
 
     if input.isdigit():
         MovtoValue = int(input) - 45
@@ -219,7 +222,9 @@ def playsound(input):
         "Aus1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/Aus1.mp3",
         "On1": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On1.mp3",
         "On2": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/On2.mp3",
-        "ns" : "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/leermagazine.mp3"
+        "ns" : "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/leermagazine.mp3",
+        "buttonp": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/buttonp.mp3",
+        "buttons": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/buttons.mp3"
     }
 
 
@@ -1248,7 +1253,10 @@ def StopStartRobot():
     except Exception as e:
         print("Fehler beim Senden des Stop-Befehls:", e)
 
-
+    if (DataVariables.left_button_state == "Stop"):
+        handle_input_from_java("buttonp")
+    else :
+        handle_input_from_java("buttons")
 
 
 threading.Thread(target=robot_listener_thread, daemon=True).start()
