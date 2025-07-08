@@ -194,11 +194,8 @@ def handle_input_from_java(user_input):
             EyesGosTo(MovtoValue)
 
     else:
-        print("Unbekannter Befehl:", input)
-    try:
-        conn.sendall(("ok" + "\n").encode())
-    except:
-        print("Antwort konnte nicht gesendet werden.")
+        print("Unbekannter Befehl (ignore) :", input)
+
 def playsound(input):
     sound_files = {
         "rb": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/rb.mp3",
@@ -1251,8 +1248,11 @@ def StopStartRobot():
     except Exception as e:
         print("Fehler beim Senden des Stop-Befehls:", e)
 
-playsound("On1");
+
+
+
 threading.Thread(target=robot_listener_thread, daemon=True).start()
+playsound("On1");
 
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
