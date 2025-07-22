@@ -1305,11 +1305,12 @@ def robot_listener_thread():
         except Exception:
             continue
 threading.Thread(target=robot_listener_thread, daemon=True).start()
+
+# play sonund "Ich bin jetzt an !"
 playsound("On1");
 
-
 ##############################################
-#### Main Loop ###############################
+#### Enter Main Loop ##########################
 ##############################################
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
