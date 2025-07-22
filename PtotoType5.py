@@ -7,7 +7,7 @@ import random
 import select
 import threading
 
-# Setup blocking socket server (empfohlen)
+# Setup blocking socket server
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind(('0.0.0.0', 30001))
@@ -17,17 +17,6 @@ print("Waiting for connection...")
 conn, addr = server_socket.accept()
 print("Connection from:", addr)
 
-def robot_listener_thread():
-    while DataVariables.running:
-        try:
-            ready, _, _ = select.select([conn], [], [], 0.1)
-            if ready:
-                data = conn.recv(1024)
-                if data:
-                    strData = data.decode().strip()
-                    handle_input_from_java(strData)
-        except Exception:
-            continue
 
 # Initialize pygame
 pygame.init()
@@ -68,7 +57,7 @@ DataVariables.BASE_MOUTH_WIDTH = 180
 DataVariables.BASE_MOUTH_HEIGHT = 40
 
 # Updated shape parameters and drawing functions
-DataVariables.FACE_SHAPE = "hexagon"  # hexagon, octagon, or rectangle
+DataVariables.FACE_SHAPE = "hexagon"
 DataVariables.FACE_WIDTH = 550
 DataVariables.FACE_HEIGHT = 700
 DataVariables.FACE_CORNER_RADIUS = 80
@@ -118,13 +107,17 @@ DataVariables.mouth_pos = (screen.get_width() / 2,
 DataVariables.running = True
 
 
-############################## Game Functions #############################################
+############################## Main Functions #############################################
 
-#integer pberprüfer
+##############################################
+######### check Integer func ################
+##############################################
 def is_integer(value):
     return value.strip().isdigit()
 
-#Event Handling functions
+##############################################
+######### Handle TERMINAL input  (old version)
+##############################################
 def handle_input_in_arg():
     import sys
     import select
@@ -152,6 +145,29 @@ def handle_input_in_arg():
         else :
             playsound(user_input)
 
+##############################################
+######### Handle TERMINAL input  (New version)
+##############################################
+def handle_terminal_input_and_talk_to_java():
+    import select
+    import sys
+
+    if select.select([sys.stdin], [], [], 0)[0]:
+        user_input = sys.stdin.readline().strip()
+        if user_input:
+            conn.sendall((user_input + "\n").encode())  # send to Java
+            try:
+                ready, _, _ = select.select([conn], [], [], 0.2)
+                if ready:
+                    response = conn.recv(1024).decode().strip()
+                    if response:
+                        print("Antwort von Java:", response)
+            except:
+                pass
+
+##############################################
+######### Handle input from Roboter /Java ####
+##############################################
 def handle_input_from_java(user_input):
     input = user_input.strip().lower()
     print("recived form Robot :", input)
@@ -199,6 +215,9 @@ def handle_input_from_java(user_input):
     else:
         print("Unbekannter Befehl (ignore) :", input)
 
+##############################################
+######### play sound form Audios #############
+##############################################
 def playsound(input):
     sound_files = {
         "rb": "/Users/ralight/PycharmProjects/pythonProject/Animation/Audios/rb.mp3",
@@ -242,6 +261,9 @@ def playsound(input):
         print("Input not recognized.")
 
 
+##############################################
+######### Handel Termination Events ##########
+##############################################
 def HandleEvents():
     # Handle cancel oder quit
     for event in pygame.event.get():
@@ -256,15 +278,26 @@ def HandleEvents():
         elif event.type == DataVariables.STOP_SPEAKING_EVENT:
             stop_speaking_test()
 
-#Eyes function
+
+##############################################
+######### Handel Eye movments ################
+##############################################
 def EyeGoRight():
     DataVariables.target_offset = DataVariables.max_swing
 def EyesGoLeft():
     DataVariables.target_offset = -DataVariables.max_swing
 def EyesFoCenter():
     DataVariables.target_offset = 0
+
+# instead of going left right or center -> eyes can move from 0 - 90
+# 0 -> max left
+# 90 -> max right
 def EyesGosTo(topos):
     DataVariables.target_offset = topos
+
+##############################################
+######### Draw Animation components ##########
+##############################################
 
 # Drew face
 def draw_face_border():
@@ -377,6 +410,8 @@ def draw_eyes():
                          iris_y - current_iris_radius // 2)
         pygame.draw.circle(screen, DataVariables.WHITE,
                            highlight_pos, current_iris_radius // 3)
+
+# Blink animation
 def blink_animation():
     if DataVariables.blink_duration > 0:
         DataVariables.blink_duration -= 1
@@ -394,6 +429,8 @@ def draw_mouth():
     else:
         # Keep the original happy mouth when not speaking
         draw_dynamic_mouth()
+
+# These 5 functions are used to test variants of the dynamic mouth and can be called from the draw_mouth() function.
 def draw_dynamic_mouth():
     """Next-generation emotional mouth rendering with physics simulation"""
     # Enhanced base parameters
@@ -561,7 +598,6 @@ def draw_dynamic_mouth():
                         ])
 
         screen.blit(mouth_surface, (0, 0))
-
 def draw_hyper_dynamic_mouth1():
     """Simplified robotic mouth for speaking"""
     base_width = DataVariables.mouth_width
@@ -976,7 +1012,6 @@ def draw_hyper_dynamic_mouth3():
 
 
         screen.blit(mouth_surface, (0, 0))
-
 def draw_Sad_mouth():
     """Dynamic sad mouth with subtle animation and detailed rendering"""
     base_width = DataVariables.mouth_width * 1.2
@@ -1051,7 +1086,10 @@ def draw_Sad_mouth():
             pygame.draw.lines(shadow_surface, (0, 0, 0, 30), False, shadow_points, 10)
             screen.blit(shadow_surface, (0, 0))
 
-#Animation Updating
+
+##############################################
+######### Update Animation components ########
+##############################################
 def update_animation():
     # Smooth eye movement
     if DataVariables.pupil_offset_x < DataVariables.target_offset:
@@ -1085,7 +1123,9 @@ def update_mouth_animation():
             DataVariables.target_openness = 0.2  # Mostly closed
 
 
-# Speaking Animation
+##############################################
+######### Speaking Animation #################
+##############################################
 def start_speaking_test(duration=60):
     """Start speaking animation for the given duration (in frames)"""
     DataVariables.speaking = True
@@ -1097,7 +1137,10 @@ def stop_speaking_test():
     # Return to slightly open mouth for happy expression
     DataVariables.target_openness = 0.1
 
-# function
+
+##############################################
+######### Draw & update the Start/pause button
+##############################################
 DataVariables.left_button_state = "Start"  # "play" oder "pause"
 def draw_top_left_button():
     button_radius = 25
@@ -1152,8 +1195,24 @@ def draw_top_left_button():
                                       button_center[1] - ripple_radius))
         else:
             delattr(DataVariables, 'left_button_click_time')
+# This func is called when  "play" / "pause" is pressed
+def StopStartRobot():
+    try:
+        command = DataVariables.left_button_state
+        conn.sendall(f"{command}\n".encode())
+        print(command,"sent to Java.")
+    except Exception as e:
+        print("Fehler beim Senden des Stop-Befehls:", e)
+
+    if (DataVariables.left_button_state == "Stop"):
+        handle_input_from_java("buttonp")
+    else :
+        handle_input_from_java("buttons")
 
 
+##############################################
+######### Draw & update the Mute/UnMute button
+##############################################
 DataVariables.right_button_state = "sound_on"  # "sound_on" oder "sound_off"
 def draw_top_right_button():
     button_radius = 25
@@ -1223,45 +1282,35 @@ def draw_top_right_button():
         else:
             delattr(DataVariables, 'right_button_click_time')
 
-# Main loop
+
+
+##############################################
+######### messege in Teminal for user ########
+##############################################
 print("Controls: Type 'left', 'right', or 'center'. Or enter a number (0-90) for precise position.\nYou can Type \"speake\" and \"stop speake\" to move the Mouth")
 
 
-
-def handle_terminal_input_and_talk_to_java():
-    import select
-    import sys
-
-    if select.select([sys.stdin], [], [], 0)[0]:
-        user_input = sys.stdin.readline().strip()
-        if user_input:
-            conn.sendall((user_input + "\n").encode())  # send to Java
-            try:
-                ready, _, _ = select.select([conn], [], [], 0.2)
-                if ready:
-                    response = conn.recv(1024).decode().strip()
-                    if response:
-                        print("Antwort von Java:", response)
-            except:
-                pass
-
-def StopStartRobot():
-    try:
-        command = DataVariables.left_button_state
-        conn.sendall(f"{command}\n".encode())
-        print(command,"sent to Java.")
-    except Exception as e:
-        print("Fehler beim Senden des Stop-Befehls:", e)
-
-    if (DataVariables.left_button_state == "Stop"):
-        handle_input_from_java("buttonp")
-    else :
-        handle_input_from_java("buttons")
-
-
+##############################################
+#### start Thread To observe Robot Commands ##
+##############################################
+def robot_listener_thread():
+    while DataVariables.running:
+        try:
+            ready, _, _ = select.select([conn], [], [], 0.1)
+            if ready:
+                data = conn.recv(1024)
+                if data:
+                    strData = data.decode().strip()
+                    handle_input_from_java(strData)
+        except Exception:
+            continue
 threading.Thread(target=robot_listener_thread, daemon=True).start()
 playsound("On1");
 
+
+##############################################
+#### Main Loop ###############################
+##############################################
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
     handle_terminal_input_and_talk_to_java()
@@ -1280,10 +1329,10 @@ while DataVariables.running or pygame.mixer.music.get_busy():
     # Draw face components
     draw_eyes()
     draw_mouth()
+
+    # Draw Buttons
     draw_top_left_button()  # Red terminate button
-
     draw_top_right_button()  # Blue sound button
-
 
     # Update display
     pygame.display.flip()
