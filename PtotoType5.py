@@ -110,7 +110,7 @@ DataVariables.running = True
 ############################## Main Functions #############################################
 
 ##############################################
-######### check Integer func ################
+######### check Integer func #################
 ##############################################
 def is_integer(value):
     return value.strip().isdigit()
