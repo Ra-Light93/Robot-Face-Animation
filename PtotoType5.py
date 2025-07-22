@@ -13,7 +13,6 @@ server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind(('0.0.0.0', 30001))
 server_socket.listen(1)
 print("Waiting for connection...")
-
 conn, addr = server_socket.accept()
 print("Connection from:", addr)
 
@@ -1305,11 +1304,12 @@ def robot_listener_thread():
         except Exception:
             continue
 threading.Thread(target=robot_listener_thread, daemon=True).start()
+
+# play sonund "Ich bin jetzt an !"
 playsound("On1");
 
-
 ##############################################
-#### Main Loop ###############################
+#### Enter Main Loop ##########################
 ##############################################
 while DataVariables.running or pygame.mixer.music.get_busy():
     HandleEvents()
