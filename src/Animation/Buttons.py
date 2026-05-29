@@ -1,6 +1,6 @@
-from config import get_config
 import pygame
 import math
+from config import get_config
 from communication import StopStartRobot
 
 def draw_top_right_button():
@@ -73,6 +73,7 @@ def draw_top_right_button():
         else:
             delattr(DataVariables, 'right_button_click_time')
 
+# old left button function:
 def draw_top_left_button():
     DataVariables = get_config()
     screen = DataVariables.screen

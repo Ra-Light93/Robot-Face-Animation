@@ -18,13 +18,20 @@ def EyesFoCenter():
     """Center both eyes."""
     get_config().target_offset = 0
 
-def EyesGosTo(topos:int):
+def EyesGosTo(value: int):
     """
     Move eyes to a specific position on a 0-90 scale.
     0  = far left
     45 = center
     90 = far right
-    Values outside range are clamped automatically.
     """
-    topos = max(0, min(90, topos))
-    get_config().target_offset = topos
+    if value < 0:
+        print(f"Invalid eye position: {value} — must be 0 or higher.")
+        return
+    if value > 90:
+        print(f"Invalid eye position: {value} — must be 90 or lower.")
+        return
+
+    cf = get_config()
+    cf.target_offset = (value - 45) * cf.max_swing / 45
+

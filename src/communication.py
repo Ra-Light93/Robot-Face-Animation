@@ -1,9 +1,10 @@
 from config import get_config
 import select
 import sys
+import os
 import pygame
 import random
-from Animation import start_speaking, EyesGosTo
+from Animation import start_speaking, EyesGosTo, EyesGoLeft, EyeGoRight, EyesFoCenter
 
 def StopStartRobot():
     DataVariables = get_config()
@@ -15,9 +16,9 @@ def StopStartRobot():
             print("Error sending:", e)
 
     if DataVariables.left_button_state == "Stop":
-        handle_input_from_java("buttonp")
+        handle_robot_command("eye buttonp")
     else:
-        handle_input_from_java("buttons")
+        handle_robot_command("eye buttons")
         
 ##############################################
 ######### Handle TERMINAL input  (New version)
@@ -28,7 +29,7 @@ def handle_terminal_input_and_talk_to_java():
         user_input = sys.stdin.readline().strip()
         if user_input:
             if DataVariables.no_socket:
-                handle_input_from_java(user_input)  # go directly to face
+                handle_robot_command(user_input)  # go directly to face
             else:
                 if DataVariables.conn == None : 
                     raise Exception("No connection available. Cannot send data to Java.")
@@ -38,7 +39,33 @@ def handle_terminal_input_and_talk_to_java():
 ##############################################
 ######### play sound form Audios #############
 ##############################################
-def playsound(input):
+def playsound(name):
+
+    DataVariables = get_config()
+    
+    actual_name = getattr(DataVariables.audio_register, name, None)
+    if actual_name is None:
+        print(f"Command '{name}' not found in audio register.")
+        return
+    
+    file_path = os.path.join(DataVariables.audio_dir, actual_name)
+    print(f"Playing sound: {file_path}")
+    
+    DataVariables.STOP_SPEAKING_EVENT = pygame.USEREVENT + 1
+    if os.path.exists(file_path):
+        sound = pygame.mixer.Sound(file_path)
+        length_in_seconds = sound.get_length()
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+        start_speaking(int(length_in_seconds))
+        pygame.time.set_timer(DataVariables.STOP_SPEAKING_EVENT, int(length_in_seconds) * 1000 + 400)
+    else:
+        print(f"Sound not found: {file_path}")
+        
+##############################################
+######### play sound form Audios #############
+##############################################
+def playsound2(input):
     DataVariables = get_config()
     
     sound_files = {
@@ -81,8 +108,7 @@ def playsound(input):
 
     else:
         print("Input not recognized.")
-
-
+        
 def robot_listener_thread():
     DataVariables = get_config()
     conn = DataVariables.conn
@@ -93,7 +119,7 @@ def robot_listener_thread():
                 data = conn.recv(1024)
                 if data:
                     strData = data.decode().strip()
-                    handle_input_from_java(strData)
+                    handle_robot_command(strData)
         except Exception:
             continue
         
@@ -101,51 +127,30 @@ def robot_listener_thread():
 ######### Handle input from Roboter /Java ####
 ##############################################
 
-def handle_input_from_java(user_input):
+def handle_robot_command(user_input):
     DataVariables = get_config()
-    input = user_input.strip().lower()
-    print("recived form Robot :", input)
-    if DataVariables.SpeakAllowed :
-        if input == "gs":
-            playsound("gs")
-        elif input == "ks":
-            playsound("ks")
-        elif input == "rs":
-            playsound("rs")
-        elif input == "gb":
-            playsound("gb")
-        elif input == "kb":
-            playsound("kb")
-        elif input == "rb":
-            playsound("rb")
-        elif input == "ns":
-            playsound("ns")
-        elif input == "g":
-            Random_Num = random.randint(1, 2)
-            randomOn = "g" + str(Random_Num)
-            playsound(randomOn)
-        elif input == "on":
-            print("System an")
-            playsound("On1");
-        elif input == "off":
-            print("System aus")
-            Random_Num = random.randint(1, 3)
-            randomOn = "Aus" + str(Random_Num)
-            playsound(randomOn);
-        elif input == "buttonp":
-            playsound("buttonp")
-        elif input == "buttons":
-            playsound("buttons")
+    command = user_input.strip()
+    print("received command:", command)
 
-    if input.isdigit():
-        MovtoValue = int(input) - 45
-        if MovtoValue > 45:
-            print("Invalid: Value too high.")
-        elif MovtoValue < -45:
-            print("Invalid: Value too low.")
-        else:
-            EyesGosTo(MovtoValue)
+    # ── Eye commands ──────────────────────────────────────
+    if command.startswith("eye "):
+        value = command[4:].strip()
+        if value == "left":     EyesGoLeft()
+        elif value == "right":  EyeGoRight()
+        elif value == "center": EyesFoCenter()
+        elif value.isdigit():   EyesGosTo(int(value))
+        else: print(f"Unknown eye command: {value}")
+        return
 
-    else:
-        print("Unbekannter Befehl (ignore) :", input)
+    # ── Sound commands ────────────────────────────────────
+    if command.startswith("sound "):
+        if not DataVariables.SpeakAllowed:
+            return
+        value = command[6:].strip()
+        # s o u n d ' '
+        # 1 2 3 4 5 6
+        playsound(value)
+        return
 
+    print(f"Unknown command: {command}")
+    

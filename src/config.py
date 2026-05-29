@@ -1,6 +1,9 @@
 from types import SimpleNamespace
 from typing import Optional
 import pygame
+import os
+import json
+
 
 _instance: Optional[SimpleNamespace] = None
 
@@ -108,6 +111,55 @@ def init_config(screen: pygame.Surface) -> SimpleNamespace:
     DataVariables.no_socket = False  # Set to True to disable socket communication (for testing without Java)
     
     DataVariables.screen = None
+    
+    DataVariables.audio_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Audios")
+    
+    DataVariables.pygame_title = "Robotic Face" 
+    
+    DataVariables.audio_register = load_audio_register(DataVariables.audio_dir)
+
     _instance = DataVariables
     return _instance
   
+
+
+def load_audio_register(audio_dir: str) -> SimpleNamespace:
+    register_path = os.path.join(audio_dir, "audio_register.json")
+    
+    # Check if register file exists
+    if not os.path.exists(register_path):
+        raise FileNotFoundError(f"Audio register not found at: {register_path}, please create it with the correct command-to-filename mappings.")
+    
+    # Load JSON
+    try:
+        with open(register_path) as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in audio_register.json: {e}")
+    
+    # Validate each entry
+    register = SimpleNamespace()
+    for command, filename in data.items():
+        # Ensure flat structure - no nested JSON
+        if not isinstance(command, str):
+            try:
+                command = str(command)
+            except Exception as e:
+                raise TypeError(f"Warning: Non-string command key '{command}' cannot be converted to string: {e}")
+            
+        if not isinstance(filename, str):
+            try:
+                filename = str(filename)
+            except Exception as e:
+                raise TypeError(f"Value for '{command}' must be a string filename, cannot be converted: {e}")
+            
+        file_path = os.path.join(audio_dir, filename)
+        
+        if not os.path.exists(file_path):
+            print(f"######˜\nRegistering command '{command}' with file '{file_path}'")
+            raise FileNotFoundError(f"Audio file missing for command '{command}': {file_path}")
+
+        setattr(register, command, filename)
+    
+    return register
+    
