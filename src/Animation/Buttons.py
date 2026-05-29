@@ -1,7 +1,6 @@
 import pygame
 import math
 from config import get_config
-from communication import StopStartRobot
 
 def draw_top_right_button():
     DataVariables = get_config()
@@ -112,7 +111,6 @@ def draw_top_left_button():
     # Klick-Handler
     if is_clicked and not hasattr(DataVariables, 'left_button_click_time'):
         DataVariables.left_button_click_time = pygame.time.get_ticks()
-        StopStartRobot()  # Deine bestehende Funktion
         DataVariables.left_button_state = "Stop" if DataVariables.left_button_state == "Start" else "Start"
 
 

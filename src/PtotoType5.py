@@ -64,12 +64,27 @@ def handle_events():
             stop_speaking()
 
 # ── Startup ──────────────────────────────────────────────
-if args.no_socket:
-    print("Controls: 'left', 'right', 'center' or 0-90 for eye position.")
-    print("Sound commands: gs, ks, rs, gb, kb, rb, on, off, g, ns")
-else:
-    print("Waiting for commands from Java robot...")
-    threading.Thread(target=robot_listener_thread, daemon=True).start()
+
+print("\n")
+print("=" * 55)
+print("  ROBOT FACE — CLI MODE")
+print("=" * 55)
+print("  Use 'eye' commands to control eye movement:")
+print("    eye left   — look left")
+print("    eye right  — look right")
+print("    eye center — look center")
+print("    eye 0-90   — precise position (45 = center)")
+print("─" * 55)
+print("  Use 'sound' commands to play registered audio:")
+print("    sound <name> — plays <name>.mp3 from Audios/")
+print("─" * 55)
+print("  Audio files are registered in Audios/audio_register.json")
+print("=" * 55)
+
+
+
+
+
 
 
 # ── Main loop ────────────────────────────────────────────

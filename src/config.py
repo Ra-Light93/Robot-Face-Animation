@@ -4,8 +4,9 @@ import pygame
 import os
 import json
 
-
+# ── Singleton instance ───────────────────────────────────
 _instance: Optional[SimpleNamespace] = None
+
 
 def get_config() -> SimpleNamespace:
     """Returns the existing config instance. Must call init_config() first."""
@@ -13,153 +14,164 @@ def get_config() -> SimpleNamespace:
         raise RuntimeError("Config not initialized. Call init_config(screen) first.")
     return _instance
 
+
 def init_config(screen: pygame.Surface) -> SimpleNamespace:
-    """Initialize config with screen dimensions. Call once from main.py."""
+    """
+    Initialize the global config with screen dimensions.
+    Must be called once from main.py before anything else.
+    Returns the singleton DataVariables namespace.
+    """
     global _instance
     if _instance is not None:
-        return _instance  
-    
-    # Create namespace for all variables
-    DataVariables = SimpleNamespace()
+        return _instance
 
-    # Varables for gloable events :
-    DataVariables.STOP_SPEAKING_EVENT = None
-    DataVariables.SpeakAllowed = True
-    
-    # Size parameters
-    DataVariables.FaceSize = 0.9
+    dv = SimpleNamespace()
 
-    # Color palette
-    DataVariables.BG = (240, 240, 245)  # Light gray background
-    DataVariables.WHITE = (255, 255, 255)
-    DataVariables.BLACK = (0, 0, 0)
-    DataVariables.EYE_WHITES = (250, 250, 255)
-    DataVariables.IRIS_COLOR = (0, 150, 255)  # Vibrant blue
-    DataVariables.PUPIL_COLOR = (0, 0, 0)
-    DataVariables.MOUTH_COLOR = (0, 140, 255)  # Electric blue
-    DataVariables.EYEBORDEAR_COLOR = (0, 0, 0)  # Black
-    DataVariables.MOUTH_INNER = (80, 80, 100)
-    DataVariables.MOUTH_ACCENT = (150, 150, 170)
+    # ── Events ───────────────────────────────────────────
+    dv.STOP_SPEAKING_EVENT = None
+    dv.SpeakAllowed = True
 
-    # Eye dimensions
-    DataVariables.BASE_EYE_WIDTH = 120
-    DataVariables.BASE_EYE_HEIGHT = 60  # More rectangular shape
-    DataVariables.BASE_IRIS_RADIUS = 25
-    DataVariables.BASE_PUPIL_RADIUS = 8
-    DataVariables.BASE_MOUTH_WIDTH = 180
-    DataVariables.BASE_MOUTH_HEIGHT = 40
+    # ── Face scale ───────────────────────────────────────
+    dv.FaceSize = 0.9
 
-    # Updated shape parameters and drawing functions
-    DataVariables.FACE_SHAPE = "hexagon"
-    DataVariables.FACE_WIDTH = 550
-    DataVariables.FACE_HEIGHT = 700
-    DataVariables.FACE_CORNER_RADIUS = 80
-    DataVariables.FACE_BORDER_THICKNESS = 12
-    DataVariables.FACE_COLOR = (220, 225, 235)
-    DataVariables.FACE_BORDER_COLOR = (80, 90, 110)
-    DataVariables.FACE_ACCENT_COLOR = (150, 160, 180)
+    # ── Color palette ────────────────────────────────────
+    dv.BG               = (240, 240, 245)   # Light gray background
+    dv.WHITE            = (255, 255, 255)
+    dv.BLACK            = (0,   0,   0  )
+    dv.EYE_WHITES       = (250, 250, 255)
+    dv.IRIS_COLOR       = (0,   150, 255)   # Vibrant blue
+    dv.PUPIL_COLOR      = (0,   0,   0  )
+    dv.MOUTH_COLOR      = (0,   140, 255)   # Electric blue
+    dv.EYEBORDEAR_COLOR = (0,   0,   0  )   # Eye border
+    dv.MOUTH_INNER      = (80,  80,  100)
+    dv.MOUTH_ACCENT     = (150, 160, 170)
 
-    #speaking elemnst
-    DataVariables.speaking = False
-    DataVariables.mouth_openness = 0.1  # 0=closed, 1=fully open
-    DataVariables.target_openness = 0.1
-    DataVariables.mouth_animation_speed = 0.05
+    # ── Eye dimensions (base, before scaling) ────────────
+    dv.BASE_EYE_WIDTH    = 120
+    dv.BASE_EYE_HEIGHT   = 60
+    dv.BASE_IRIS_RADIUS  = 25
+    dv.BASE_PUPIL_RADIUS = 8
+    dv.BASE_MOUTH_WIDTH  = 180
+    dv.BASE_MOUTH_HEIGHT = 40
 
-    # Calculate scaled dimensions
-    DataVariables.eye_width = int(DataVariables.BASE_EYE_WIDTH * DataVariables.FaceSize)
-    DataVariables.eye_height = int(DataVariables.BASE_EYE_HEIGHT * DataVariables.FaceSize)
+    # ── Face shape parameters ────────────────────────────
+    dv.FACE_SHAPE            = "hexagon"
+    dv.FACE_WIDTH            = 550
+    dv.FACE_HEIGHT           = 700
+    dv.FACE_CORNER_RADIUS    = 80
+    dv.FACE_BORDER_THICKNESS = 12
+    dv.FACE_COLOR            = (220, 225, 235)
+    dv.FACE_BORDER_COLOR     = (80,  90,  110)
+    dv.FACE_ACCENT_COLOR     = (150, 160, 180)
 
-    # Face position
-    DataVariables.face_pos = (screen.get_width() // 2, screen.get_height() // 2)
+    # ── Mouth / speaking state ───────────────────────────
+    dv.speaking              = False
+    dv.mouth_openness        = 0.1   # 0 = closed, 1 = fully open
+    dv.target_openness       = 0.1
+    dv.mouth_animation_speed = 0.05
 
-    # Eye positions
-    eye_spacing = 220 * DataVariables.FaceSize
-    DataVariables.left_eye_pos = (screen.get_width() / 2 - eye_spacing / 2,
-                                screen.get_height() / 2 - 70 * DataVariables.FaceSize)
-    DataVariables.right_eye_pos = (screen.get_width() / 2 + eye_spacing / 2,
-                                screen.get_height() / 2 - 70 * DataVariables.FaceSize)
+    # ── Scaled eye dimensions ────────────────────────────
+    dv.eye_width  = int(dv.BASE_EYE_WIDTH  * dv.FaceSize)
+    dv.eye_height = int(dv.BASE_EYE_HEIGHT * dv.FaceSize)
 
-    # Iris parameters
-    DataVariables.iris_radius = int(DataVariables.BASE_IRIS_RADIUS * DataVariables.FaceSize)
-    DataVariables.pupil_radius = int(DataVariables.BASE_PUPIL_RADIUS * DataVariables.FaceSize)
-    DataVariables.iris_shrink = 0.9  # Less distortion when looking sideways
+    # ── Face position (screen center) ────────────────────
+    dv.face_pos = (screen.get_width() // 2, screen.get_height() // 2)
 
-    # Animation control
-    DataVariables.pupil_offset_x = 0
-    DataVariables.target_offset = 0
-    DataVariables.move_speed = 3  # Faster for robotic movement
-    DataVariables.blink_duration = 0
-    DataVariables.max_swing = (DataVariables.eye_width // 2) - DataVariables.iris_radius
+    # ── Eye positions ────────────────────────────────────
+    eye_spacing       = 220 * dv.FaceSize
+    dv.left_eye_pos   = (screen.get_width() / 2 - eye_spacing / 2,
+                         screen.get_height() / 2 - 70 * dv.FaceSize)
+    dv.right_eye_pos  = (screen.get_width() / 2 + eye_spacing / 2,
+                         screen.get_height() / 2 - 70 * dv.FaceSize)
 
-    # Mouth position
-    DataVariables.mouth_width = int(DataVariables.BASE_MOUTH_WIDTH * DataVariables.FaceSize)
-    DataVariables.mouth_height = int(DataVariables.BASE_MOUTH_HEIGHT * DataVariables.FaceSize)
-    DataVariables.mouth_pos = (screen.get_width() / 2,
-                            screen.get_height() / 2 + 80 * DataVariables.FaceSize)
+    # ── Iris / pupil parameters ──────────────────────────
+    dv.iris_radius  = int(dv.BASE_IRIS_RADIUS  * dv.FaceSize)
+    dv.pupil_radius = int(dv.BASE_PUPIL_RADIUS * dv.FaceSize)
+    dv.iris_shrink  = 0.9   # Less distortion when looking sideways
 
-    DataVariables.running = True
-    
-    # Buttons state
-    DataVariables.left_button_state = "Start"  # "play" oder "pause"
-    DataVariables.right_button_state = "sound_on"  # "sound_on" oder "sound_off"
-    
-    # connection variable for communication
-    DataVariables.conn = None
-    DataVariables.addr = None
-    
-    # Socket communication
-    DataVariables.no_socket = False  # Set to True to disable socket communication (for testing without Java)
-    
-    DataVariables.screen = None
-    
-    DataVariables.audio_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Audios")
-    
-    DataVariables.pygame_title = "Robotic Face" 
-    
-    DataVariables.audio_register = load_audio_register(DataVariables.audio_dir)
+    # ── Eye animation control ────────────────────────────
+    dv.pupil_offset_x = 0
+    dv.target_offset  = 0
+    dv.move_speed     = 3   # Pixels per frame
+    dv.blink_duration = 0
+    dv.max_swing      = (dv.eye_width // 2) - dv.iris_radius
 
-    _instance = DataVariables
+    # ── Mouth position ───────────────────────────────────
+    dv.mouth_width  = int(dv.BASE_MOUTH_WIDTH  * dv.FaceSize)
+    dv.mouth_height = int(dv.BASE_MOUTH_HEIGHT * dv.FaceSize)
+    dv.mouth_pos    = (screen.get_width()  / 2,
+                       screen.get_height() / 2 + 80 * dv.FaceSize)
+
+    # ── Runtime state ────────────────────────────────────
+    dv.running = True
+
+    # ── Button states ────────────────────────────────────
+    dv.left_button_state  = "Start"     # "Start" or "Stop"
+    dv.right_button_state = "sound_on"  # "sound_on" or "sound_off"
+
+    # ── Socket / connection ──────────────────────────────
+    dv.conn      = None
+    dv.addr      = None
+    dv.no_socket = False   # Overridden by --no-socket flag in main.py
+
+    # ── Screen reference ─────────────────────────────────
+    dv.screen = None
+
+    # ── Audio ────────────────────────────────────────────
+    dv.audio_dir      = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Audios")
+    dv.pygame_title   = "Robotic Face"
+    dv.audio_register = load_audio_register(dv.audio_dir)
+
+    _instance = dv
     return _instance
-  
 
 
 def load_audio_register(audio_dir: str) -> SimpleNamespace:
+    """
+    Loads and validates the audio_register.json file from the Audios folder.
+    Each entry maps a command name to an audio filename (including extension).
+    Raises clear errors if the file is missing, malformed, or references missing audio files.
+    """
     register_path = os.path.join(audio_dir, "audio_register.json")
-    
-    # Check if register file exists
+
+    # Check register file exists
     if not os.path.exists(register_path):
-        raise FileNotFoundError(f"Audio register not found at: {register_path}, please create it with the correct command-to-filename mappings.")
-    
-    # Load JSON
+        raise FileNotFoundError(
+            f"Audio register not found at: {register_path}\n"
+            f"Please create it with command-to-filename mappings."
+        )
+
+    # Parse JSON
     try:
         with open(register_path) as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in audio_register.json: {e}")
-    
-    # Validate each entry
+
+    # Validate and build register
     register = SimpleNamespace()
     for command, filename in data.items():
-        # Ensure flat structure - no nested JSON
+
+        # Ensure flat structure — no nested objects
         if not isinstance(command, str):
             try:
                 command = str(command)
             except Exception as e:
-                raise TypeError(f"Warning: Non-string command key '{command}' cannot be converted to string: {e}")
-            
+                raise TypeError(f"Command key '{command}' cannot be converted to string: {e}")
+
         if not isinstance(filename, str):
             try:
                 filename = str(filename)
             except Exception as e:
-                raise TypeError(f"Value for '{command}' must be a string filename, cannot be converted: {e}")
-            
+                raise TypeError(f"Filename for '{command}' cannot be converted to string: {e}")
+
+        # Verify audio file exists on disk
         file_path = os.path.join(audio_dir, filename)
-        
         if not os.path.exists(file_path):
-            print(f"######˜\nRegistering command '{command}' with file '{file_path}'")
-            raise FileNotFoundError(f"Audio file missing for command '{command}': {file_path}")
+            raise FileNotFoundError(
+                f"Audio file missing for command '{command}': {file_path}"
+            )
 
         setattr(register, command, filename)
-    
+
     return register
-    
