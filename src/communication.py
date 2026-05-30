@@ -6,26 +6,36 @@ import pygame
 import random
 from Animation import start_speaking, EyesGosTo, EyesGoLeft, EyeGoRight, EyesFoCenter
 
+def update_user(*messages: str):
+    DataVariables = get_config()
+    message = " ".join(str(m) for m in messages)
+    if DataVariables.conn is not None:
+        try:
+            DataVariables.conn.sendall((message + "\n").encode())
+        except Exception as e:
+            print(f"Failed to send to Java: {e}")
+    else:
+        print(message)
+
 def handle_terminal_input_and_talk_to_java():
     DataVariables = get_config()
     if select.select([sys.stdin], [], [], 0)[0]:
         user_input = sys.stdin.readline().strip()
         if user_input:
             if DataVariables.no_socket:
-                handle_robot_command(user_input)  # go directly to face
+                handle_robot_command(user_input)
             else:
-                if DataVariables.conn == None : 
+                if DataVariables.conn is None:
                     raise Exception("No connection available. Cannot send data to Java.")
-                else :
-                    DataVariables.conn.sendall((user_input + "\n").encode())  
-
+                DataVariables.conn.sendall((user_input + "\n").encode())
+                
 def playsound(name):
 
     DataVariables = get_config()
     
     actual_name = getattr(DataVariables.audio_register, name, None)
     if actual_name is None:
-        print(f"Command '{name}' not found in audio register.")
+        update_user(f"Command '{name}' not found in audio register.")
         return
     
     file_path = os.path.join(DataVariables.audio_dir, actual_name)
@@ -39,7 +49,7 @@ def playsound(name):
         start_speaking(int(length_in_seconds))
         pygame.time.set_timer(DataVariables.STOP_SPEAKING_EVENT, int(length_in_seconds) * 1000 + 400)
     else:
-        print(f"Sound not found: {file_path}")
+        update_user(f"Sound not found: {file_path}")
                 
 def handle_robot_command(user_input):
     DataVariables = get_config()
@@ -55,7 +65,7 @@ def handle_robot_command(user_input):
         elif value == "center": EyesFoCenter()
         elif value.isdigit():   EyesGosTo(int(value))
         else: 
-            print(f"Unknown eye command: {value}")
+            update_user(f"Unknown eye command: {value}")
         return
 
     # ── Sound commands ────────────────────────────────────
@@ -68,7 +78,7 @@ def handle_robot_command(user_input):
         playsound(value)
         return
 
-    print(f"Unknown command: {command}")
+    update_user(f"Unknown command: {command}")
     
 def robot_listener_thread():
     DataVariables = get_config()
@@ -80,7 +90,9 @@ def robot_listener_thread():
                 data = conn.recv(1024)
                 if data:
                     strData = data.decode().strip()
+                    print(f"From Java: '{strData}'")  # ← add this
                     handle_robot_command(strData)
-        except Exception:
+        except Exception as e:
+            update_user(f"Thread error: {e}")  # ← and this
             continue
     

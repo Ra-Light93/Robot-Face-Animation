@@ -5,60 +5,55 @@ from config import get_config
 def draw_top_right_button():
     DataVariables = get_config()
     screen = DataVariables.screen
-    button_radius = 25
-    button_center = (screen.get_width() - 50, 45)  # Position rechts
+    fs = DataVariables.FaceSize
 
-    # Hover und Click Effekte
+    button_radius = DataVariables.button_radius
+    margin = int(50 * fs)
+    button_center = (screen.get_width() - margin, int(45 * fs))
+
+    # Hover and click effects
     mouse_pos = pygame.mouse.get_pos()
     distance = math.sqrt((mouse_pos[0] - button_center[0]) ** 2 + (mouse_pos[1] - button_center[1]) ** 2)
     is_hovered = distance <= button_radius
     is_clicked = pygame.mouse.get_pressed()[0] and is_hovered
 
-    # Button Farbe (Blau)
+    # Button color (blue)
     base_color = (70, 130, 200)
     current_color = (50, 110, 180) if is_clicked else (90, 150, 220) if is_hovered else base_color
 
-    # Button zeichnen
-    pygame.draw.circle(screen, (30, 30, 30, 150), (button_center[0] + 3, button_center[1] + 3), button_radius)
+    # Draw button
+    pygame.draw.circle(screen, (30, 30, 30), (button_center[0] + 3, button_center[1] + 3), button_radius)
     pygame.draw.circle(screen, current_color, button_center, button_radius)
 
-    # Audio Symbol (Wellenform oder durchgestrichen)
+    # Audio symbol - wave points scaled
+    s = int(12 * fs)
     symbol_color = (240, 240, 240)
-    if DataVariables.right_button_state == "sound_on":
-        # Wellenform Symbol
-        wave_points = [
-            (button_center[0] - 12, button_center[1] + 5),
-            (button_center[0] - 8, button_center[1] - 8),
-            (button_center[0] - 4, button_center[1] + 2),
-            (button_center[0], button_center[1] - 5),
-            (button_center[0] + 4, button_center[1] + 0),
-            (button_center[0] + 8, button_center[1] - 3),
-            (button_center[0] + 12, button_center[1] + 6)
-        ]
-        pygame.draw.lines(screen, symbol_color, False, wave_points, 2)
-    else:
-        # Durchgestrichenes Symbol
-        wave_points = [
-            (button_center[0] - 12, button_center[1] + 5),
-            (button_center[0] - 8, button_center[1] - 8),
-            (button_center[0] - 4, button_center[1] + 2),
-            (button_center[0], button_center[1] - 5),
-            (button_center[0] + 4, button_center[1] + 0),
-            (button_center[0] + 8, button_center[1] - 3),
-            (button_center[0] + 12, button_center[1] + 6)
-        ]
-        pygame.draw.lines(screen, symbol_color, False, wave_points, 2)
-        pygame.draw.line(screen, (255, 60, 60),
-                         (button_center[0] - 15, button_center[1] - 15),
-                         (button_center[0] + 15, button_center[1] + 15), 3)
+    wave_points = [
+        (button_center[0] - s,       button_center[1] + int(5  * fs)),
+        (button_center[0] - int(8*fs), button_center[1] - int(8  * fs)),
+        (button_center[0] - int(4*fs), button_center[1] + int(2  * fs)),
+        (button_center[0],             button_center[1] - int(5  * fs)),
+        (button_center[0] + int(4*fs), button_center[1]              ),
+        (button_center[0] + int(8*fs), button_center[1] - int(3  * fs)),
+        (button_center[0] + s,         button_center[1] + int(6  * fs)),
+    ]
+    pygame.draw.lines(screen, symbol_color, False, wave_points, max(1, int(2 * fs)))
 
-    # Klick-Handler
+    # Muted symbol — red cross
+    if DataVariables.right_button_state == "sound_off":
+        cross = int(15 * fs)
+        pygame.draw.line(screen, (255, 60, 60),
+                         (button_center[0] - cross, button_center[1] - cross),
+                         (button_center[0] + cross, button_center[1] + cross),
+                         max(1, int(3 * fs)))
+
+    # Click handler
     if is_clicked and not hasattr(DataVariables, 'right_button_click_time'):
         DataVariables.right_button_click_time = pygame.time.get_ticks()
         DataVariables.right_button_state = "sound_off" if DataVariables.right_button_state == "sound_on" else "sound_on"
         DataVariables.SpeakAllowed = not DataVariables.SpeakAllowed
 
-    # Ripple-Effekt
+    # Ripple effect
     if hasattr(DataVariables, 'right_button_click_time'):
         elapsed = pygame.time.get_ticks() - DataVariables.right_button_click_time
         if elapsed < 500:
@@ -71,7 +66,7 @@ def draw_top_right_button():
                                       button_center[1] - ripple_radius))
         else:
             delattr(DataVariables, 'right_button_click_time')
-
+            
 # old left button function:
 def draw_top_left_button():
     DataVariables = get_config()

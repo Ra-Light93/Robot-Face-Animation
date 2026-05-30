@@ -32,7 +32,7 @@ def init_config(screen: pygame.Surface) -> SimpleNamespace:
     dv.SpeakAllowed = True
 
     # ── Face scale ───────────────────────────────────────
-    dv.FaceSize = 0.9
+    dv.FaceSize = min(screen.get_width(), screen.get_height()) / 1000 * 0.9
 
     # ── Color palette ────────────────────────────────────
     dv.BG               = (240, 240, 245)   # Light gray background
@@ -108,11 +108,15 @@ def init_config(screen: pygame.Surface) -> SimpleNamespace:
     # ── Button states ────────────────────────────────────
     dv.left_button_state  = "Start"     # "Start" or "Stop"
     dv.right_button_state = "sound_on"  # "sound_on" or "sound_off"
-
+    dv.button_radius = int(25 * dv.FaceSize)
+    
     # ── Socket / connection ──────────────────────────────
     dv.conn      = None
     dv.addr      = None
+    dv.port      = None
+    dv.server_socket = None
     dv.no_socket = False   # Overridden by --no-socket flag in main.py
+
 
     # ── Screen reference ─────────────────────────────────
     dv.screen = None
