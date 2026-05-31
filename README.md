@@ -52,7 +52,7 @@ Install [Miniforge](https://github.com/conda-forge/miniforge) or any conda distr
 conda init bash
 ```
 
-Close and reopen your terminal, then create and activate the environment:
+Close and reopen your terminal, then create and activate the environment — we have it ready for you in [`environment.yml`](environment.yml):
 
 ```bash
 conda env create -f environment.yml
