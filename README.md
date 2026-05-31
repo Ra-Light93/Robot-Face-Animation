@@ -189,7 +189,9 @@ The entry point that ties everything together. It initializes pygame, parses com
 
 ## TCP Connection (Java)
 
-The face acts as a TCP **server** — it listens for a single client connection. A Java example client is included in `JavaTCPClient/`.
+The face acts as a TCP **server** — it listens for a single client connection on a configurable port. It works with any TCP client, not just Java — the included `JavaTCPClient/` is simply an example to get started quickly.
+
+To keep the animation smooth and uninterrupted, incoming commands are handled in a dedicated background thread separate from the main loop. This means the 60fps animation runs continuously while the communication thread listens and processes commands independently — a command arriving over TCP or from the CLI never blocks or slows down the face rendering.
 
 <div align="center">
 
