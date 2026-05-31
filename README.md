@@ -133,13 +133,13 @@ eye <0-90>     — precise position (0 = far left, 45 = center, 90 = far right)
 sound <name>   — play a registered sound by command name
 ```
 
-Sound commands must be registered in `Audios/audio_register.json` before use (see below).
+Sound commands must be registered in `Robot-Face-Animation/Audios/audio_register.json` before use (see below).
 
 ---
 
 ## Registering Sound Commands
 
-Sound commands are mapped in `Audios/audio_register.json`. Each entry maps a **command name** to an **audio filename** (including extension):
+Sound commands are mapped in `Robot-Face-Animation/Audios/audio_register.json`. Each entry maps a **command name** to an **audio filename** (including extension):
 
 ```json
 {
@@ -158,7 +158,7 @@ Rules:
 - All entries are validated on startup — a clear error is raised if anything is missing
 
 To add a new sound:
-1. Drop your audio file into the `Audios/` folder
+1. Drop your audio file into the `Robot-Face-Animation/Audios/` folder
 2. Add an entry to `audio_register.json`, e.g. `"say_hi": "hi_sound.mp3"`
 3. Restart the program so the new sound is registered
 4. Call it with `sound say_hi`
