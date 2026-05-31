@@ -64,6 +64,15 @@ This installs Python 3.12 and pygame automatically.
 
 > You can change the environment name by editing the `name` field at the top of `environment.yml` before running `conda env create`.
 
+### Removing the environment
+
+If you want to remove the environment:
+
+```bash
+conda deactivate
+conda env remove --name Robot_Face
+```
+
 <div align="center">
 
 ### Startup & Initialization
@@ -83,15 +92,6 @@ python src/main.py -ns  # or --no-socket
 **Socket mode** (waiting for Java robot):
 ```bash
 python src/main.py
-```
-
-### Removing the environment
-
-If you want to remove the environment:
-
-```bash
-conda deactivate
-conda env remove --name Robot_Face
 ```
 
 ---
