@@ -4,9 +4,28 @@ A pygame-based animated robot face built as part of a Bachelor's module in **Hum
 
 The module focused on the socio-technical design of human-robot interaction — combining engineering and psychology to make robots more approachable and communicative. This face was our team's contribution: a real-time animated display that gives the robot a personality.
 
-<img src="media/demo_display.gif" alt="Face display demo" />
-<img src="media/demo_init.gif" alt="Initialization demo" />
-<img src="media/demo_tcp.gif" alt="TCP connection demo" />
+<div align="center">
+
+### Face Display
+<img src="media/demo_display.gif" alt="Face display demo" width="100%" />
+
+*The animated robot face — eyes, mouth, blinking, and speaking animation.*
+
+---
+
+### Startup & Initialization
+<img src="media/demo_init.gif" alt="Initialization demo" width="100%" />
+
+*Starting the program, loading config, and connecting.*
+
+---
+
+### TCP Connection
+<img src="media/demo_tcp.gif" alt="TCP connection demo" width="100%" />
+
+*Sending commands from the Java client to the robot face over TCP.*
+
+</div>
 
 *Eye movement and mouth animation in action. No audio in the gifs — sound plays during live use.*
 
