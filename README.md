@@ -250,5 +250,5 @@ The robot successfully completed the module.
 
 ---
 
-## License
+
 
