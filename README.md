@@ -78,7 +78,7 @@ conda env remove --name Robot_Face
 ### Startup & Initialization
 <img src="media/demo_init.gif" alt="Initialization demo" width="100%" />
 
-*Starting the program, loading config, and registering audio files.*
+*Initialization demo.*
 
 </div>
 
