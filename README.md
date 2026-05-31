@@ -183,7 +183,7 @@ All drawing and animation functions live here: the face border, eyes, mouth, bli
 Handles all incoming input — whether from the terminal or over TCP. `handle_robot_command()` is the single entry point for all commands regardless of source, keeping the command logic in one place. `update_user()` routes feedback either back to the connected TCP client or to the local terminal depending on the current mode (socket or CLI).
 
 ### `main.py` 
-The entry point that ties everything together. It initializes pygame, parses command line arguments, sets up the config, opens the TCP socket if needed, starts the listener thread, and runs the main 60fps draw loop.
+The entry point that ties everything together. It initializes pygame, parses command line arguments, sets up the config, opens the TCP socket if needed, starts the listener **thread**, and runs the main 60fps draw loop.
 
 ---
 
@@ -191,7 +191,7 @@ The entry point that ties everything together. It initializes pygame, parses com
 
 The face acts as a TCP **server** — it listens for a single client connection on a configurable port. It works with any TCP client, not just Java — the included `JavaTCPClient/` is simply an example to get started quickly.
 
-To keep the animation smooth and uninterrupted, incoming commands are handled in a dedicated background thread separate from the main loop. This means the 60fps animation runs continuously while the communication thread listens and processes commands independently — a command arriving over TCP or from the CLI never blocks or slows down the face rendering.
+To keep the animation smooth and uninterrupted, incoming commands are handled in a dedicated background **thread** separate from the main loop. This means the 60fps animation runs continuously while the communication **thread** listens and processes commands independently — a command arriving over TCP or from the CLI never blocks or slows down the face rendering.
 
 <div align="center">
 
