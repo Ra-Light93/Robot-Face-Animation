@@ -9,25 +9,9 @@ The module focused on the socio-technical design of human-robot interaction — 
 ### Face Display
 <img src="media/demo_display.gif" alt="Face display demo" width="100%" />
 
-*The animated robot face — eyes, mouth, blinking, and speaking animation.*
-
----
-
-### Startup & Initialization
-<img src="media/demo_init.gif" alt="Initialization demo" width="100%" />
-
-*Starting the program, loading config, and connecting.*
-
----
-
-### TCP Connection
-<img src="media/demo_tcp.gif" alt="TCP connection demo" width="100%" />
-
-*Sending commands from the Java client to the robot face over TCP.*
+*The animated robot face — eyes, mouth, blinking, and speaking animation. No audio in the gif — sound plays during live use.*
 
 </div>
-
-*Eye movement and mouth animation in action. No audio in the gifs — sound plays during live use.*
 
 ---
 
@@ -50,9 +34,11 @@ The robot face renders an animated sci-fi style face in a pygame window and resp
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourname/Robot-Face-Animation.git
+git clone https://github.com/Ra-Light93/Robot-Face-Animation.git
 cd Robot-Face-Animation
 ```
+
+The repository includes everything needed to run — source code, audio files, and the Java TCP client. Once cloned you are ready to go.
 
 ### 2. Set up the conda environment
 
@@ -72,6 +58,15 @@ conda activate Robot_Face
 This installs Python 3.12 and pygame automatically.
 
 > You can change the environment name by editing the `name` field at the top of `environment.yml` before running `conda env create`.
+
+<div align="center">
+
+### Startup & Initialization
+<img src="media/demo_init.gif" alt="Initialization demo" width="100%" />
+
+*Starting the program, loading config, and registering audio files.*
+
+</div>
 
 ### 3. Run the face
 
@@ -189,6 +184,15 @@ The entry point that ties everything together. It initializes pygame, parses com
 
 The face acts as a TCP **server** — it listens for a single client connection. A Java example client is included in `JavaTCPClient/`.
 
+<div align="center">
+
+### TCP Connection Demo
+<img src="media/demo_tcp.gif" alt="TCP connection demo" width="100%" />
+
+*Sending commands from the Java client to the robot face over TCP.*
+
+</div>
+
 ### Compile and run the Java client
 
 ```bash
@@ -245,4 +249,6 @@ My part in this project was developing the robot's face — the visual interface
 The robot successfully completed the module.
 
 ---
+
+## License
 
