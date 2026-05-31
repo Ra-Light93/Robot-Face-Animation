@@ -55,6 +55,7 @@ conda init bash
 Close and reopen your terminal, then create and activate the environment — we have it ready for you in [`environment.yml`](environment.yml):
 
 ```bash
+conda activate base
 conda env create -f environment.yml
 conda activate Robot_Face
 ```
