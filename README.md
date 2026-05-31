@@ -169,18 +169,18 @@ To add a new sound:
 
 The project is split into four main parts:
 
-### `config.py` — The Brain
+### `config.py` 
 Holds the global `DataVariables` singleton (`SimpleNamespace`) that stores every piece of shared state: colors, sizes, positions, animation state, socket connection, audio registry, and more. All other modules call `get_config()` to access it. **If you want to change how the face looks or behaves, start here.**
 
 The design follows a shared-state pattern: any module can read or update `DataVariables` at any time without coordinating with other parts of the system. Changes take effect automatically on the next frame — the main loop runs at 60fps and calls all animation functions in sequence, each of which reads the current state and renders accordingly. This means a single variable update anywhere in the code is enough to change what the face does next.
 
-### `Animation/` — The Face
+### `Animation/` 
 All drawing and animation functions live here: the face border, eyes, mouth, blinking, speaking animation, and UI buttons. Every parameter is read from `DataVariables`, so the face scales automatically with window size and responds instantly to state changes.
 
-### `communication.py` — The Ears
+### `communication.py` 
 Handles all incoming input — whether from the terminal or over TCP. `handle_robot_command()` is the single entry point for all commands regardless of source, keeping the command logic in one place. `update_user()` routes feedback either back to the connected TCP client or to the local terminal depending on the current mode (socket or CLI).
 
-### `main.py` — The Wiring
+### `main.py` 
 The entry point that ties everything together. It initializes pygame, parses command line arguments, sets up the config, opens the TCP socket if needed, starts the listener thread, and runs the main 60fps draw loop.
 
 ---
