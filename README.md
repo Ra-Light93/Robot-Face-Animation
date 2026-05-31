@@ -17,7 +17,7 @@ The module focused on the socio-technical design of human-robot interaction — 
 
 ## What It Does
 
-The robot face renders an animated sci-fi style face in a pygame window and responds to commands in real time:
+The robot face renders an animated face in a pygame window and responds to commands in real time:
 
 - **Eye movement** — eyes move left, right, center, or to a precise position
 - **Mouth animation** — physics-based mouth that animates when the robot speaks
