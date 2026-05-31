@@ -154,7 +154,7 @@ Sound commands are mapped in `Robot-Face-Animation/Audios/audio_register.json`. 
 Rules:
 - The structure must be flat — no nested objects (e.g. `"gs": "gs.mp3"`, not `"gs": {"file": "gs.mp3"}`)
 - The filename must include the extension (`.mp3`, `.wav`, etc.)
-- The audio file must exist in the `Audios/` folder
+- The audio file must exist in the `Robot-Face-Animation/Audios/` folder
 - All entries are validated on startup — a clear error is raised if anything is missing
 
 To add a new sound:
