@@ -172,6 +172,8 @@ The project is split into four main parts:
 ### `config.py` 
 Holds the global `DataVariables` singleton (`SimpleNamespace`) that stores every piece of shared state: colors, sizes, positions, animation state, socket connection, audio registry, and more. All other modules call `get_config()` to access it. **If you want to change how the face looks or behaves, start here.**
 
+On startup, it also loads and validates `audio_register.json` — mapping sound command names to their audio files and making them available to the rest of the system through `DataVariables`.
+
 The design follows a shared-state pattern: any module can read or update `DataVariables` at any time without coordinating with other parts of the system. Changes take effect automatically on the next frame — the main loop runs at 60fps and calls all animation functions in sequence, each of which reads the current state and renders accordingly. This means a single variable update anywhere in the code is enough to change what the face does next.
 
 ### `Animation/` 
