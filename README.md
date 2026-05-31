@@ -40,7 +40,11 @@ cd Robot-Face-Animation
 
 The repository includes everything needed to run — source code, audio files, and the Java TCP client. Once cloned you are ready to go.
 
-### 2. Set up the conda environment
+### 2. Install dependencies
+
+The only required library is **pygame**. If you already have Python 3.12 and pygame installed, you can skip this step and run the project directly.
+
+If not, we recommend setting up a conda environment so you can easily remove it later without affecting your system:
 
 Install [Miniforge](https://github.com/conda-forge/miniforge) or any conda distribution, then initialize conda for your shell. You only need to do this once:
 
