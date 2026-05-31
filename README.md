@@ -221,21 +221,30 @@ eye 45
 
 ```
 Robot-Face-Animation/
-├── src/
-│   ├── main.py              # Entry point
-│   ├── config.py            # Global state and audio registry
-│   ├── communication.py     # Input handling, sound, TCP
-│   └── Animation/           # All drawing functions
-├── Audios/
-│   ├── audio_register.json  # Sound command mappings
-│   └── *.mp3                # Audio files
+├── Robot-Face-Animation/
+│   ├── Audios/
+│   │   ├── audio_register.json  # Sound command mappings
+│   │   └── *.mp3                # Audio files
+│   └── src/
+│       ├── Animation/           # All drawing functions
+│       │   ├── Buttons.py
+│       │   ├── Draw.py
+│       │   ├── Eyes.py
+│       │   ├── Speaking.py
+│       │   ├── UpdateFace.py
+│       │   └── __init__.py
+│       ├── main.py              # Entry point
+│       ├── config.py            # Global state and audio registry
+│       └── communication.py    # Input handling, sound, TCP
 ├── JavaTCPClient/
-│   └── RobotFaceClient.java # Example Java TCP client
+│   └── RobotFaceClient.java    # Example Java TCP client
 ├── media/
-│   ├── demo_display.gif     # Face display demo
-│   ├── demo_init.gif        # Initialization demo
-│   └── demo_tcp.gif         # TCP connection demo
-└── environment.yml          # Conda environment
+│   ├── demo_display.gif        # Face display demo
+│   ├── demo_init.gif           # Initialization demo
+│   └── demo_tcp.gif            # TCP connection demo
+├── environment.yml             # Conda environment
+├── .gitignore
+└── README.md
 ```
 
 ---
