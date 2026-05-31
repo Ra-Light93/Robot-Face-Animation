@@ -1,6 +1,6 @@
 # Robot Face Animation
 
-A pygame-based animated robot face built as part of a Bachelor's module in **Human-Centered Robotics** (*Menschenzentrierte Robotik*) at university. The face was designed to be the visual interface of a **KUKA one-arm robot**, receiving commands from a Java-based robot controller over a TCP connection and reacting with expressive animations.
+A pygame-based animated robot face built as part of a Bachelor's module in **Human-Centered Robotics** (*Menschenzentrierte Robotik*) at [RUB University](https://www.ruhr-uni-bochum.de). The face was designed to be the visual interface of a [**KUKA one-arm robot**](https://www.kuka.com), receiving commands from a Java-based robot controller over a TCP connection and reacting with expressive animations.
 
 The module focused on the socio-technical design of human-robot interaction — combining engineering and psychology to make robots more approachable and communicative. This face was our team's contribution: a real-time animated display that gives the robot a personality.
 
