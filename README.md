@@ -2,7 +2,7 @@
 
 A pygame-based animated robot face built as part of a Bachelor's module in **Human-Centered Robotics** (*Menschenzentrierte Robotik*) at [RUB University](https://www.ruhr-uni-bochum.de). The face was designed to be the visual interface of a [**KUKA one-arm robot**](https://www.kuka.com), receiving commands from a Java-based robot controller over a TCP connection and reacting with expressive animations.
 
-The module focused on the socio-technical design of human-robot interaction — combining engineering and psychology to make robots more approachable and communicative. My part was developing the robot's face, with the goal of making it feel as natural and less robotic as possible. Small details like blinking, smooth eye movement, and a subtle mouth animation help create a presence that feels less mechanical and a little more approachable — not fully expressive, but enough to leave a decent impression on people interacting with it.
+The module focused on the socio-technical design of human-robot interaction — combining engineering and psychology to make robots more approachable and communicative. My part was developing the robot's face, with the goal of making it feel as natural and less robotic as possible. Small details like blinking and smooth eye movement help create a presence that feels a little more approachable. The mouth was the hardest part — several approaches were tried, including circular and rectangular robotic-style mouths, but none felt right. The final result uses a physics-based curve that moves up and down like a string when the robot speaks, which turned out to be the most natural-looking solution out of everything that was tested.
 
 <div align="center">
 
